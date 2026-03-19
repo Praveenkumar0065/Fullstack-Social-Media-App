@@ -91,7 +91,7 @@ This project is functional and deployment-ready for demo/portfolio usage.
 ## Local Setup
 
 1. Clone the repository:
-   - git clone https://github.com/YOUR_USERNAME/Fullstack-Social-Media-App.git
+   - git clone https://github.com/Praveenkumar0065/Fullstack-Social-Media-App.git
 2. Go into the project folder:
    - cd Fullstack-Social-Media-App
 3. Backend setup:
