@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SocialSphere</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="topbar glass">
+      <div class="brand" data-link="/">SocialSphere</div>
+      <nav class="nav" id="mainNav">
+        <button class="nav-btn" data-link="/">Home</button>
+        <button class="nav-btn authed" data-link="/feed">Feed</button>
+        <button class="nav-btn authed" data-link="/explore">Explore</button>
+        <button class="nav-btn authed" data-link="/messages">Messages</button>
+        <button class="nav-btn authed" data-link="/notifications">Notifications</button>
+        <button class="nav-btn authed" data-link="/profile">Profile</button>
+        <button class="nav-btn authed admin-only" data-link="/admin">Admin</button>
+      </nav>
+      <div class="top-actions">
+        <button id="langBtn" class="chip">EN</button>
+        <button id="themeBtn" class="chip">☾</button>
+        <button id="logoutBtn" class="chip authed">Logout</button>
+      </div>
+    </header>
+
+    <main id="view" class="view"></main>
+
+    <footer class="footer">
+      <small>© <span id="year"></span> SocialSphere · Global-ready · Mobile-first</small>
+    </footer>
+  </div>
+
+  <template id="landing-template">
+    <section class="hero card fade-in">
+      <div>
+        <h1 data-i18n="hero_title">Share moments that matter.</h1>
+        <p data-i18n="hero_sub">Create posts, connect with friends, and discover trending content worldwide.</p>
+        <div class="row">
+          <button class="btn primary" data-link="/signup" data-i18n="get_started">Get Started</button>
+          <button class="btn" data-link="/login" data-i18n="login">Login</button>
+        </div>
+      </div>
+      <div class="hero-art"></div>
+    </section>
+    <section class="grid-3 mt">
+      <article class="card"><h3>Secure Auth</h3><p>Email verification and session management.</p></article>
+      <article class="card"><h3>Smart Feed</h3><p>Personalized ranking with saved posts.</p></article>
+      <article class="card"><h3>Global Scale</h3><p>Ready for localization and deployment.</p></article>
+    </section>
+  </template>
+
+  <template id="login-template">
+    <section class="auth-wrap card fade-in">
+      <h2 data-i18n="login">Login</h2>
+      <form id="loginForm" class="form">
+        <input required type="email" name="email" placeholder="Email" />
+        <input required type="password" name="password" placeholder="Password" minlength="6" />
+        <button class="btn primary" type="submit" data-i18n="login">Login</button>
+      </form>
+      <p class="muted">No account? <a href="#" data-link="/signup">Create one</a></p>
+    </section>
+  </template>
+
+  <template id="signup-template">
+    <section class="auth-wrap card fade-in">
+      <h2 data-i18n="signup">Sign Up</h2>
+      <form id="signupForm" class="form">
+        <input required type="text" name="name" placeholder="Display name" />
+        <input required type="email" name="email" placeholder="Email" />
+        <input required type="password" name="password" placeholder="Password" minlength="6" />
+        <button class="btn primary" type="submit" data-i18n="signup">Sign Up</button>
+      </form>
+      <p class="muted">Already have an account? <a href="#" data-link="/login">Login</a></p>
+    </section>
+  </template>
+
+  <template id="feed-template">
+    <section class="stories card fade-in" id="storiesBar"></section>
+    <section class="composer card mt">
+      <h3>Create post</h3>
+      <form id="postForm" class="form compact">
+        <textarea name="content" maxlength="500" placeholder="What\'s happening?"></textarea>
+        <input type="url" name="media" placeholder="Photo/Video URL (optional)" />
+        <div class="row between">
+          <button class="btn primary" type="submit">Post</button>
+          <small class="muted">Spam protection enabled</small>
+        </div>
+      </form>
+    </section>
+    <section id="postList" class="stack mt"></section>
+  </template>
+
+  <template id="explore-template">
+    <section class="card fade-in">
+      <div class="row between">
+        <input id="searchInput" class="search" placeholder="Search users, #hashtags" />
+        <button id="searchBtn" class="btn">Search</button>
+      </div>
+    </section>
+    <section id="exploreGrid" class="explore-grid mt"></section>
+  </template>
+
+  <template id="profile-template">
+    <section class="card fade-in">
+      <h2>Profile</h2>
+      <div id="profileBox"></div>
+    </section>
+  </template>
+
+  <template id="notifications-template">
+    <section class="card fade-in"><h2>Notifications</h2><div id="notificationsList" class="stack"></div></section>
+  </template>
+
+  <template id="messages-template">
+    <section class="card fade-in"><h2>Direct Messages</h2><div id="dmList" class="stack"></div></section>
+  </template>
+
+  <template id="admin-template">
+    <section class="card fade-in">
+      <h2>Admin Dashboard</h2>
+      <div class="row gap"><button id="flaggedBtn" class="btn">Load Flagged Content</button></div>
+      <div id="moderationList" class="stack mt"></div>
+    </section>
+  </template>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
