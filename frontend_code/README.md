@@ -1,6 +1,6 @@
-# SocialSphere Full-Stack Frontend
+# Pixora Frontend
 
-SPA frontend for the SocialSphere app, connected to a FastAPI backend.
+SPA frontend for the Pixora social media app, connected to a FastAPI backend.
 
 ## Pages
 - `/` Landing Page (Header, Hero, Auth Buttons)
@@ -19,6 +19,8 @@ SPA frontend for the SocialSphere app, connected to a FastAPI backend.
 - Spam protection (client-side rate limiting)
 - Multi-language (EN/ES)
 - Mobile responsive and global-ready UI
+- Follow/Unfollow buttons are frontend-only currently
+- Firebase auth is optional and currently mock/off mode
 
 ## Run (with backend)
 1. Start backend API from the `backend_code` folder:

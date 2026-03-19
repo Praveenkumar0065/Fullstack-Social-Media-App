@@ -1,6 +1,6 @@
-# SocialSphere Backend
+# Pixora Backend
 
-FastAPI backend for the SocialSphere full-stack app.
+FastAPI backend for the Pixora full-stack social media app.
 
 ## Endpoints
 
