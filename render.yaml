@@ -16,3 +16,5 @@ services:
         sync: false
       - key: MONGODB_DB
         value: socialsphere
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=384
