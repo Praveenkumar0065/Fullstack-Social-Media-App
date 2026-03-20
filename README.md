@@ -1,25 +1,26 @@
-# Fullstack-Social-Media-App
+# SocialSphere - Full-Stack Social Media Web App
 
-Production-ready full-stack social media web app built with FastAPI, SPA frontend, MongoDB, authentication, posts, saved posts, notifications, messaging, admin moderation, and Render deployment support.
+SocialSphere is a production-ready full-stack social media web application built for portfolio, learning, and deployment practice. It includes authentication, social feed features, saved posts, notifications, messaging, admin moderation support, multilingual UI, theming, and Render deployment.
 
-## Pixora - Full-Stack Social Media Web App
+## Live Demo
+- App: https://socialsphere-app-wc5v.onrender.com
+- Health Check: https://socialsphere-app-wc5v.onrender.com/health
+- API Docs: https://socialsphere-app-wc5v.onrender.com/docs
 
-Pixora is a full-stack social media web application built for portfolio and learning purposes. It includes authentication, post creation, social feed interactions, saved posts, notifications, direct messages, admin moderation tools, and deployment-ready configuration.
-
-## Project Summary
-Built a full-stack social media web application with user authentication, post creation, likes, comments, saved posts, notifications, messaging, admin moderation, and cloud deployment support using FastAPI, MongoDB, and a responsive SPA frontend.
+## GitHub Repository
+- https://github.com/Praveenkumar0065/Fullstack-Social-Media-App
 
 ## Features
 
 ### Authentication
 - User sign up and login
-- Backend auth endpoints for register/login
-- Basic role support (user/admin)
-- Optional Firebase auth template (currently mock/off mode)
+- Backend authentication endpoints
+- Basic role support (user, admin)
+- Optional Firebase auth template in mock/off mode
 
-### Social Feed and Posts
+### Social Feed
 - Create posts with text and optional media URL
-- View posts in newest-first order
+- View all posts in newest-first order
 - Like posts
 - Comment on posts
 - Delete posts
@@ -36,87 +37,129 @@ Built a full-stack social media web application with user authentication, post c
 
 ### Explore and Discovery
 - Explore page with search input
-- Demo trending/search-backed content rendering
+- Trending/demo-backed discovery UI
 
 ### Profile and Account
-- Profile page showing name, email, and verification state
+- Profile page with name, email, and verification status
 - Follow/Unfollow buttons in UI (frontend-only currently)
 
 ### Admin Features
-- Admin dashboard
-- Flagged content list endpoint for moderation workflow
+- Admin dashboard route/page
+- Flagged content moderation endpoint
 
 ### UX and Platform Features
-- SPA routing
-- Theme toggle
+- Single Page Application routing
 - Language toggle (EN/ES)
+- Theme toggle
 - Client-side anti-spam/rate-limit behavior
-- Mobile-responsive design
+- Mobile-responsive UI
 
 ### Backend and Deployment
 - FastAPI backend
-- FastAPI docs at /docs
-- Health check endpoint at /health
+- Swagger docs at /docs
+- Health endpoint at /health
 - MongoDB support
 - In-memory fallback mode
-- Seed/demo data setup
-- Single-service Render deployment setup
+- Seed/demo data support
+- Single-service Render deployment
 
 ## Tech Stack
-- Frontend: SPA frontend (HTML, CSS, JavaScript)
-- Backend: FastAPI (Python)
+- Frontend: SPA frontend
+- Backend: FastAPI
 - Database: MongoDB
 - Deployment: Render
-- API Docs: Swagger UI via FastAPI
+- API Docs: FastAPI Swagger UI
+
+## Project Structure
+```bash
+Fullstack-Social-Media-App/
+|-- backend_code/
+|-- frontend_code/
+|-- render.yaml
+|-- README.md
+`-- DEPLOYMENT_RUNBOOK.md
+```
 
 ## Current Status
-This project is functional and deployment-ready for demo/portfolio usage.
+
+This project is live and deployment-ready for portfolio/demo usage.
 
 ### Implemented
+
 - Authentication
-- Posts/feed
-- Likes/comments/delete
+- Social feed and posts
+- Likes, comments, delete
 - Saved posts
-- Notifications/messages
+- Notifications and messages
 - Admin moderation endpoint
-- Responsive frontend
+- Responsive UI
 - Render deployment support
 
-### Planned or Partial
+### Partial / Planned
+
 - Full backend follow/unfollow system
-- Real Firebase authentication integration
-- Expanded explore recommendation system
+- Full Firebase authentication integration
+- Expanded recommendation/discovery system
 - Improved real-time messaging
 
 ## Local Setup
 
-1. Clone the repository:
-   - git clone https://github.com/Praveenkumar0065/Fullstack-Social-Media-App.git
-2. Go into the project folder:
-   - cd Fullstack-Social-Media-App
-3. Backend setup:
-   - cd backend_code
-   - python -m pip install -r requirements.txt
-   - python -m uvicorn main:app --reload
-4. Frontend local run (optional separate static server):
-   - cd ../frontend_code
-   - python -m http.server 5500
+### 1. Clone the repository
 
-## API Endpoints
-- /docs - FastAPI Swagger docs
-- /health - health check
+```bash
+git clone https://github.com/Praveenkumar0065/Fullstack-Social-Media-App.git
+cd Fullstack-Social-Media-App
+```
+
+### 2. Configure environment variables
+
+Create your environment file and add required values such as:
+
+```env
+MONGODB_URI=your_mongodb_connection_string
+```
+
+### 3. Run the backend
+
+Install dependencies and run the FastAPI server based on the project structure.
 
 ## Deployment
-This project is configured for Render deployment with a single-service setup using render.yaml.
 
-## Resume Bullets
-- Developed a full-stack social media web application with FastAPI backend and responsive SPA frontend.
-- Implemented user authentication, role-based access, post creation, likes, comments, saved posts, and admin moderation endpoints.
-- Integrated MongoDB support with fallback demo mode and prepared the application for cloud deployment on Render.
-- Designed mobile-responsive UI with theme toggle, language toggle, notifications, messages, and profile workflows.
+This project is configured for deployment on Render using render.yaml.
 
-## Tagline
-A deployment-ready full-stack social platform with core social features, admin workflow, and responsive user experience.
+Main deployment steps:
+
+1. Push code to GitHub
+2. Create a Blueprint deploy on Render
+3. Add MONGODB_URI
+4. Deploy and verify /, /health, and /docs
+
+Detailed deployment instructions are available in:
+
+- DEPLOYMENT_RUNBOOK.md
+
+## Screenshots
+
+Add screenshots here:
+
+- Landing page
+- Login page
+- Feed page
+- Profile page
+- Admin page
+- API docs page
+
+## Known Notes
+
+- Follow/Unfollow is currently frontend-only
+- Firebase auth is included as a template in mock/off mode
+- Some discovery content uses demo/fallback rendering
+- If MongoDB is not configured, the app may use in-memory fallback mode
 
 ## Author
+
 Praveen Kumar
+
+## Resume Project Summary
+
+Developed and deployed a full-stack social media web application using FastAPI, MongoDB, and a SPA frontend with authentication, posts, saved posts, notifications, messaging, admin moderation, multilingual UI, and Render-based cloud deployment.
