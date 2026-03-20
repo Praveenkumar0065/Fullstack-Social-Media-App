@@ -41,6 +41,10 @@ This runbook is for deploying Fullstack-Social-Media-App to Render using the exi
 ## Troubleshooting
 - Build fails:
   - Confirm backend_code/Dockerfile exists and is valid.
+- Worker OOM / "JS heap out of memory":
+  - Render free tier has 512 MB RAM. NODE_OPTIONS=--max-old-space-size=384 is already set
+    in both the Dockerfile and render.yaml to cap the Node heap and leave headroom for the
+    OS and Python runtime. If builds still OOM, consider upgrading to the Render Starter plan.
 - App boots but data is not persistent:
   - Verify MONGODB_URI is set correctly in Render.
 - CORS issue:
