@@ -54,13 +54,10 @@ Run these checks immediately after each production deploy. Replace <BASE_URL> wi
 ### Fast Path (Automated)
 Use the automation script to run the key checks end-to-end:
 
-- Basic run:
   - powershell -ExecutionPolicy Bypass -File scripts/smoke_test.ps1 -BaseUrl https://<your-render-service>.onrender.com
 - With explicit non-admin guard validation:
   - powershell -ExecutionPolicy Bypass -File scripts/smoke_test.ps1 -BaseUrl https://<your-render-service>.onrender.com -UserEmail <non-admin-email> -UserPassword <non-admin-password>
-- Include login rate-limit probe:
   - powershell -ExecutionPolicy Bypass -File scripts/smoke_test.ps1 -BaseUrl https://<your-render-service>.onrender.com -RunRateLimit
-
 ### Fast Path (GitHub Actions Manual Run)
 Use manual workflow dispatch to run smoke checks from CI against your live Render URL:
 

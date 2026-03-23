@@ -142,7 +142,11 @@ async def root():
 
 @app.get("/health", tags=["health"])
 async def health_check():
-    return {"status": "healthy"}
+    return {
+        "status": "healthy",
+        "version": APP_VERSION,
+        "app": APP_NAME,
+    }
 
 
 @app.websocket("/ws/chat")

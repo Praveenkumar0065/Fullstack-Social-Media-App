@@ -8,6 +8,8 @@ param(
     [string]$UserEmail = "",
     [string]$UserPassword = "",
 
+    [string]$ExpectedVersion = "",
+
     [switch]$RunRateLimit
 )
 
@@ -140,12 +142,31 @@ Write-Host "Running smoke tests against $BaseUrl" -ForegroundColor Cyan
 
 # 1) Health and docs
 try {
-    $health = Invoke-JsonRequest -Method GET -Url "$BaseUrl/health" -Raw
-    if ($health.StatusCode -eq 200) {
+    $healthRaw = Invoke-JsonRequest -Method GET -Url "$BaseUrl/health" -Raw
+    if ($healthRaw.StatusCode -eq 200) {
         Write-Pass "Health endpoint" "status 200"
+
+        if ($ExpectedVersion) {
+            try {
+                $healthJson = $healthRaw.Content | ConvertFrom-Json
+                $actualVersion = [string]$healthJson.version
+                if ($actualVersion -eq $ExpectedVersion) {
+                    Write-Pass "Health version" "expected $ExpectedVersion"
+                }
+                elseif ($actualVersion) {
+                    Write-Fail "Health version" "expected $ExpectedVersion got $actualVersion"
+                }
+                else {
+                    Write-Fail "Health version" "expected $ExpectedVersion but response has no version"
+                }
+            }
+            catch {
+                Write-Fail "Health version" "unable to parse /health JSON: $($_.Exception.Message)"
+            }
+        }
     }
     else {
-        Write-Fail "Health endpoint" "expected 200 got $($health.StatusCode)"
+        Write-Fail "Health endpoint" "expected 200 got $($healthRaw.StatusCode)"
     }
 }
 catch {
