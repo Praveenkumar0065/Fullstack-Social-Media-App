@@ -5,8 +5,13 @@ const runtimeApiBase =
     ? String(window.SOCIALSPHERE_API_BASE)
     : "";
 
+const browserSameOriginApiBase =
+  typeof window !== "undefined" && window.location && window.location.origin
+    ? `${window.location.origin}/api`
+    : "";
+
 export const API_BASE =
-  (import.meta.env.VITE_API_BASE || runtimeApiBase || "http://127.0.0.1:8000/api").replace(/\/$/, "");
+  (import.meta.env.VITE_API_BASE || runtimeApiBase || browserSameOriginApiBase || "http://127.0.0.1:8000/api").replace(/\/$/, "");
 
 export const api = axios.create({
   baseURL: API_BASE,
