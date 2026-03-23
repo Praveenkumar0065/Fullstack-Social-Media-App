@@ -97,17 +97,25 @@ def test_post_crud_and_saved_flow(client: TestClient):
     assert create.status_code == 200
     post = create.json()
     post_id = post["id"]
+    headers = _auth(token)
 
-    assert client.post(f"/api/posts/{post_id}/like").status_code == 200
-    assert client.post(f"/api/posts/{post_id}/comment", json={"author": "Pia", "comment": "Nice"}).status_code == 200
-    assert client.post(f"/api/posts/{post_id}/save").status_code == 200
+    assert client.post(f"/api/posts/{post_id}/like", headers=headers).status_code == 200
+    assert (
+        client.post(
+            f"/api/posts/{post_id}/comment",
+            json={"author": "Pia", "comment": "Nice"},
+            headers=headers,
+        ).status_code
+        == 200
+    )
+    assert client.post(f"/api/posts/{post_id}/save", headers=headers).status_code == 200
 
-    saved = client.get("/api/posts/saved")
+    saved = client.get("/api/posts/saved", headers=headers)
     assert saved.status_code == 200
     assert any(p["id"] == post_id for p in saved.json()["posts"])
 
-    assert client.post(f"/api/posts/{post_id}/unsave").status_code == 200
-    assert client.delete(f"/api/posts/{post_id}").status_code == 200
+    assert client.post(f"/api/posts/{post_id}/unsave", headers=headers).status_code == 200
+    assert client.delete(f"/api/posts/{post_id}", headers=headers).status_code == 200
 
 
 def test_follow_unfollow_and_user_directory(client: TestClient):
