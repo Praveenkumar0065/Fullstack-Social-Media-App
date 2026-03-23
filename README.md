@@ -153,6 +153,7 @@ For split hosting (Render backend + Vercel frontend):
 
 Config templates provided:
 - backend_code/.env.example
+- frontend_react/.env.example
 - frontend_code/deploy-config.example.js
 
 Main deployment steps:
@@ -165,6 +166,7 @@ Main deployment steps:
 Detailed deployment instructions are available in:
 
 - DEPLOYMENT_RUNBOOK.md
+- GLOBAL_LAUNCH_GUIDE.md
 
 ## Continuous Integration
 

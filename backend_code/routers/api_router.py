@@ -9,7 +9,7 @@ import cloudinary
 import cloudinary.uploader
 
 try:
-    from backend_code.auth import create_access_token, create_refresh_token, decode_refresh_token, get_current_user, get_refresh_token_expiry_epoch, require_admin
+    from backend_code.auth import create_access_token, create_refresh_token, decode_refresh_token, get_current_user, get_refresh_token_expiry_epoch, hash_password, is_password_hashed, require_admin, verify_password
     from backend_code.db import audit_log
     from backend_code.db import check_rate_limit
     from backend_code.db import create_notification
@@ -54,7 +54,7 @@ try:
         TokenRefreshResponse,
     )
 except ModuleNotFoundError:
-    from auth import create_access_token, create_refresh_token, decode_refresh_token, get_current_user, get_refresh_token_expiry_epoch, require_admin
+    from auth import create_access_token, create_refresh_token, decode_refresh_token, get_current_user, get_refresh_token_expiry_epoch, hash_password, is_password_hashed, require_admin, verify_password
     from db import audit_log
     from db import check_rate_limit
     from db import create_notification
@@ -148,7 +148,7 @@ users_store = {
     "admin@socialsphere.app": {
         "name": "Admin",
         "email": "admin@socialsphere.app",
-        "password": "admin123",
+        "password": hash_password("admin123"),
         "verified": True,
         "role": "admin",
         "followers": [],
@@ -389,7 +389,7 @@ async def signup(payload: SignupRequest):
         new_user = {
             "name": payload.name.strip(),
             "email": email_key,
-            "password": payload.password,
+            "password": hash_password(payload.password),
             "verified": False,
             "role": "admin" if "admin" in email_key else "user",
             "followers": [],
@@ -416,7 +416,7 @@ async def signup(payload: SignupRequest):
     users_store[email_key] = {
         "name": payload.name.strip(),
         "email": email_key,
-        "password": payload.password,
+        "password": hash_password(payload.password),
         "verified": False,
         "role": "admin" if "admin" in email_key else "user",
         "followers": [],
@@ -442,11 +442,14 @@ async def login(payload: LoginRequest):
     users_col = _users_collection()
     if users_col is not None:
         user = users_col.find_one({"email": email_key})
-        if not user or user.get("password") != payload.password:
+        stored_password = str((user or {}).get("password", ""))
+        if not user or not verify_password(payload.password, stored_password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password",
             )
+        if not is_password_hashed(stored_password):
+            users_col.update_one({"email": email_key}, {"$set": {"password": hash_password(payload.password)}})
         refresh_token = create_refresh_token(user["email"])
         store_refresh_token(refresh_token, user["email"], get_refresh_token_expiry_epoch())
         audit_log("auth_login", actor=email_key)
@@ -459,11 +462,14 @@ async def login(payload: LoginRequest):
         )
 
     user = users_store.get(email_key)
-    if not user or user.get("password") != payload.password:
+    stored_password = str((user or {}).get("password", ""))
+    if not user or not verify_password(payload.password, stored_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         )
+    if not is_password_hashed(stored_password):
+        user["password"] = hash_password(payload.password)
     refresh_token = create_refresh_token(user["email"])
     store_refresh_token(refresh_token, user["email"], get_refresh_token_expiry_epoch())
     audit_log("auth_login", actor=email_key)

@@ -7,3 +7,4 @@ pymongo==4.11.1
 PyJWT==2.10.1
 cloudinary==1.44.0
 python-multipart==0.0.20
+sentry-sdk[fastapi]==2.18.0

@@ -7,6 +7,11 @@ from uuid import uuid4
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
 
+try:
+    from backend_code.auth import hash_password
+except ModuleNotFoundError:
+    from auth import hash_password
+
 _client = None
 _db = None
 _seeded = False
@@ -55,7 +60,7 @@ def _seed_database(db):
             {
                 "name": "Admin",
                 "email": admin_email,
-                "password": "admin123",
+                "password": hash_password("admin123"),
                 "verified": True,
                 "role": "admin",
                 "followers": [],

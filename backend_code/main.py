@@ -9,6 +9,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
+try:
+    import sentry_sdk
+except ModuleNotFoundError:
+    sentry_sdk = None
 
 try:
     from backend_code.auth import decode_access_token
@@ -44,6 +48,8 @@ logger = logging.getLogger("socialsphere.main")
 APP_NAME = os.getenv("APP_NAME", "Social Web App API")
 APP_VERSION = os.getenv("APP_VERSION", "1.0.0")
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*")
+SENTRY_DSN = os.getenv("SENTRY_DSN", "").strip()
+SENTRY_TRACES_SAMPLE_RATE = float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.0"))
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 FRONTEND_DIR_CANDIDATES = [
     PROJECT_ROOT / "frontend_react" / "dist",
@@ -57,6 +63,16 @@ app = FastAPI(
     version=APP_VERSION,
     description="Backend API for a social web application with authentication, posts, messaging, moderation, and admin capabilities.",
 )
+
+if SENTRY_DSN and sentry_sdk is not None:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        traces_sample_rate=max(0.0, min(SENTRY_TRACES_SAMPLE_RATE, 1.0)),
+        environment=os.getenv("APP_ENV", "production"),
+        release=APP_VERSION,
+    )
+elif SENTRY_DSN:
+    logger.warning("sentry_dsn_provided_but_sdk_missing")
 
 active_chat_connections: Dict[str, Set[WebSocket]] = {}
 socket_users: Dict[WebSocket, str] = {}
