@@ -1,0 +1,66 @@
+name: Post Deploy Smoke Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Live backend base URL (example: https://socialsphere-app.onrender.com)"
+        required: true
+        type: string
+      run_rate_limit:
+        description: "Include login rate-limit probe"
+        required: true
+        default: "no"
+        type: choice
+        options:
+          - "no"
+          - "yes"
+      run_non_admin_check:
+        description: "Validate admin guard with non-admin account"
+        required: true
+        default: "no"
+        type: choice
+        options:
+          - "no"
+          - "yes"
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run smoke test script
+        shell: pwsh
+        env:
+          SMOKE_ADMIN_EMAIL: ${{ secrets.SMOKE_ADMIN_EMAIL }}
+          SMOKE_ADMIN_PASSWORD: ${{ secrets.SMOKE_ADMIN_PASSWORD }}
+          SMOKE_USER_EMAIL: ${{ secrets.SMOKE_USER_EMAIL }}
+          SMOKE_USER_PASSWORD: ${{ secrets.SMOKE_USER_PASSWORD }}
+        run: |
+          $args = @{
+            BaseUrl = "${{ inputs.base_url }}"
+          }
+
+          if ($env:SMOKE_ADMIN_EMAIL) {
+            $args.AdminEmail = $env:SMOKE_ADMIN_EMAIL
+          }
+          if ($env:SMOKE_ADMIN_PASSWORD) {
+            $args.AdminPassword = $env:SMOKE_ADMIN_PASSWORD
+          }
+
+          if ("${{ inputs.run_non_admin_check }}" -eq "yes") {
+            if (-not $env:SMOKE_USER_EMAIL -or -not $env:SMOKE_USER_PASSWORD) {
+              throw "SMOKE_USER_EMAIL and SMOKE_USER_PASSWORD secrets are required when run_non_admin_check=yes"
+            }
+            $args.UserEmail = $env:SMOKE_USER_EMAIL
+            $args.UserPassword = $env:SMOKE_USER_PASSWORD
+          }
+
+          if ("${{ inputs.run_rate_limit }}" -eq "yes") {
+            $args.RunRateLimit = $true
+          }
+
+          ./scripts/smoke_test.ps1 @args

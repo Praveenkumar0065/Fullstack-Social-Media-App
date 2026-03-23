@@ -1,0 +1,199 @@
+from __future__ import annotations
+
+import argparse
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+
+def read_report(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def escape_html(text: str) -> str:
+    return (
+        text.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+        .replace("'", "&#39;")
+    )
+
+
+def render_dashboard(report: dict, title: str) -> str:
+    summary = report.get("summary", {})
+    risk = summary.get("risk", {})
+    deps = report.get("dependencies", [])
+
+    low = int(risk.get("low", 0))
+    medium = int(risk.get("medium", 0))
+    high = int(risk.get("high", 0))
+    total = int(summary.get("total", len(deps)))
+
+    generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%SZ")
+
+    rows = []
+    for dep in deps:
+        ecosystem = escape_html(str(dep.get("ecosystem", "")))
+        package = escape_html(str(dep.get("package", "")))
+        version = escape_html(str(dep.get("version", "")))
+        license_name = escape_html(str(dep.get("license", "")))
+        risk_level = escape_html(str(dep.get("risk", "")))
+        aliases = ", ".join(dep.get("aliases", [])) if isinstance(dep.get("aliases"), list) else ""
+        aliases = escape_html(aliases)
+        rows.append(
+            f"<tr><td>{ecosystem}</td><td>{package}</td><td>{version}</td><td>{license_name}</td><td class='risk-{risk_level}'>{risk_level}</td><td>{aliases}</td></tr>"
+        )
+
+    row_html = "\n".join(rows)
+
+    return f"""<!doctype html>
+<html lang=\"en\">
+<head>
+  <meta charset=\"utf-8\" />
+  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
+  <title>{escape_html(title)}</title>
+  <style>
+    body {{
+      margin: 0;
+      font-family: Segoe UI, Arial, sans-serif;
+      background: linear-gradient(180deg, #f8fbff 0%, #eef4f9 100%);
+      color: #0f172a;
+    }}
+    .wrap {{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }}
+    .hero {{
+      border: 1px solid #d8e5ee;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }}
+    .title {{
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+    }}
+    .meta {{
+      margin-top: 6px;
+      color: #475569;
+      font-size: 13px;
+    }}
+    .stats {{
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }}
+    .card {{
+      border: 1px solid #dbe7f1;
+      background: #fdfefe;
+      border-radius: 12px;
+      padding: 12px;
+    }}
+    .label {{
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 4px;
+    }}
+    .value {{
+      font-size: 22px;
+      font-weight: 700;
+    }}
+    .ok {{ color: #047857; }}
+    .warn {{ color: #b45309; }}
+    .danger {{ color: #b91c1c; }}
+
+    .table-wrap {{
+      margin-top: 16px;
+      border: 1px solid #d8e5ee;
+      border-radius: 14px;
+      overflow: auto;
+      background: #ffffff;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }}
+    table {{
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }}
+    th, td {{
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid #edf2f7;
+      font-size: 13px;
+      vertical-align: top;
+    }}
+    th {{
+      background: #f8fafc;
+      font-weight: 700;
+      color: #334155;
+    }}
+    .risk-low {{ color: #047857; font-weight: 700; }}
+    .risk-medium {{ color: #b45309; font-weight: 700; }}
+    .risk-high {{ color: #b91c1c; font-weight: 700; }}
+  </style>
+</head>
+<body>
+  <div class=\"wrap\">
+    <section class=\"hero\">
+      <h1 class=\"title\">{escape_html(title)}</h1>
+      <p class=\"meta\">Generated at {generated} (UTC)</p>
+      <div class=\"stats\">
+        <div class=\"card\"><div class=\"label\">Total Dependencies</div><div class=\"value\">{total}</div></div>
+        <div class=\"card\"><div class=\"label\">Low Risk</div><div class=\"value ok\">{low}</div></div>
+        <div class=\"card\"><div class=\"label\">Medium Risk</div><div class=\"value warn\">{medium}</div></div>
+        <div class=\"card\"><div class=\"label\">High Risk</div><div class=\"value danger\">{high}</div></div>
+      </div>
+    </section>
+
+    <section class=\"table-wrap\">
+      <table>
+        <thead>
+          <tr>
+            <th>Ecosystem</th>
+            <th>Package</th>
+            <th>Version</th>
+            <th>License</th>
+            <th>Risk</th>
+            <th>Aliases</th>
+          </tr>
+        </thead>
+        <tbody>
+          {row_html}
+        </tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>
+"""
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Generate an HTML compliance dashboard from JSON license report")
+    parser.add_argument("--input", required=True, help="Path to JSON report generated by check_dependency_licenses.py")
+    parser.add_argument("--output", required=True, help="Path to output HTML dashboard")
+    parser.add_argument("--title", default="License Compliance Dashboard", help="Dashboard title")
+    args = parser.parse_args()
+
+    input_path = Path(args.input)
+    output_path = Path(args.output)
+
+    if not input_path.exists():
+        raise FileNotFoundError(f"Input report not found: {input_path}")
+
+    report = read_report(input_path)
+    html = render_dashboard(report, args.title)
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(html, encoding="utf-8")
+    print(f"Wrote dashboard: {output_path}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

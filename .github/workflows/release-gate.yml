@@ -1,0 +1,325 @@
+name: Release Gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version without prefix (example: 1.0.0)"
+        required: true
+        type: string
+      smoke_test_confirmed:
+        description: "Have Render production smoke tests been completed?"
+        required: true
+        default: "no"
+        type: choice
+        options:
+          - "no"
+          - "yes"
+      docker_build:
+        description: "Build Docker image as part of release"
+        required: true
+        default: "yes"
+        type: choice
+        options:
+          - "no"
+          - "yes"
+      docker_push:
+        description: "Push Docker image to Docker Hub (requires secrets)"
+        required: true
+        default: "no"
+        type: choice
+        options:
+          - "no"
+          - "yes"
+      auto_deploy:
+        description: "Trigger deploy hooks after successful release"
+        required: true
+        default: "no"
+        type: choice
+        options:
+          - "no"
+          - "yes"
+      notify_after_release:
+        description: "Send webhook notification after successful release"
+        required: true
+        default: "no"
+        type: choice
+        options:
+          - "no"
+          - "yes"
+
+permissions:
+  contents: write
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate release version format and VERSION file match
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if ! echo "${INPUT_VERSION}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Invalid version format: ${INPUT_VERSION}. Use semantic version X.Y.Z"
+            exit 1
+          fi
+          if [ ! -s "VERSION" ]; then
+            echo "VERSION file missing or empty"
+            exit 1
+          fi
+          CANONICAL_VERSION=$(tr -d '[:space:]' < VERSION)
+          if [ "${INPUT_VERSION}" != "${CANONICAL_VERSION}" ]; then
+            echo "Version mismatch. Input=${INPUT_VERSION}, VERSION file=${CANONICAL_VERSION}"
+            exit 1
+          fi
+
+      - name: Validate release notes file
+        env:
+          RELEASE_NOTES_PATH: release-notes/v${{ inputs.version }}.md
+        run: |
+          if [ ! -s "${RELEASE_NOTES_PATH}" ]; then
+            echo "Missing or empty release notes file: ${RELEASE_NOTES_PATH}"
+            echo "Create it before running a release."
+            exit 1
+          fi
+
+      - name: Validate release notes sections
+        env:
+          RELEASE_NOTES_PATH: release-notes/v${{ inputs.version }}.md
+        run: |
+          for section in "## Summary" "## Changes" "## Migration Notes" "## Validation"; do
+            if ! grep -q "^${section}$" "${RELEASE_NOTES_PATH}"; then
+              echo "Release notes missing required section: ${section}"
+              exit 1
+            fi
+          done
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend_code/requirements.txt
+          pip install -r backend_code/requirements-dev.txt
+
+      - name: Run backend tests (coverage gate)
+        run: pytest --cov=backend_code --cov-report=term-missing --cov-fail-under=60 -q backend_code/tests
+
+      - name: Compile backend modules
+        run: python -m compileall backend_code
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install frontend_react dependencies
+        run: |
+          cd frontend_react
+          npm ci
+
+      - name: Dependency license audit (strict)
+        run: |
+          python scripts/check_dependency_licenses.py --verify-notices --strict \
+            --allowed-license MIT \
+            --allowed-license Apache-2.0 \
+            --allowed-license BSD-3-Clause \
+            --allowed-license BSD \
+            --allowed-license Unlicense \
+            --allowed-license ISC \
+            --fail-on-risk medium \
+            --report-json artifacts/license-compliance-release-gate.json
+
+      - name: Build release-gate HTML compliance dashboard
+        run: |
+          python scripts/generate_license_dashboard.py --input artifacts/license-compliance-release-gate.json --output artifacts/license-compliance-release-gate.html --title "Release Gate License Compliance"
+
+      - name: Frontend syntax checks
+        run: |
+          node --check frontend_code/app.js
+          node --check frontend_code/firebase-config.js
+
+  create-release-tag:
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    if: ${{ inputs.smoke_test_confirmed == 'yes' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog entry from commits
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          if [ -n "${PREV_TAG}" ]; then
+            RANGE="${PREV_TAG}..HEAD"
+          else
+            RANGE="HEAD"
+          fi
+
+          {
+            echo "## v${VERSION} - $(date -u +%Y-%m-%d)"
+            echo
+            echo "### Commits"
+            git log --pretty=format:"- %s (%h)" ${RANGE}
+            echo
+            echo
+          } > changelog-entry.tmp
+
+          if [ -f CHANGELOG.md ]; then
+            cat changelog-entry.tmp CHANGELOG.md > CHANGELOG.new.md
+          else
+            cat changelog-entry.tmp > CHANGELOG.new.md
+          fi
+          mv CHANGELOG.new.md CHANGELOG.md
+          rm -f changelog-entry.tmp
+
+      - name: Commit and push changelog update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          if git diff --cached --quiet; then
+            echo "No changelog changes to commit"
+          else
+            git commit -m "chore(release): update changelog for v${{ inputs.version }}"
+            git push origin HEAD
+          fi
+
+      - name: Create and push release tag
+        env:
+          TAG_NAME: v${{ inputs.version }}
+        run: |
+          git fetch --tags
+          if git rev-parse "${TAG_NAME}" >/dev/null 2>&1; then
+            echo "Tag ${TAG_NAME} already exists"
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${TAG_NAME}" -m "Release ${TAG_NAME}"
+          git push origin "${TAG_NAME}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          name: Release v${{ inputs.version }}
+          body_path: release-notes/v${{ inputs.version }}.md
+
+  docker-image:
+    runs-on: ubuntu-latest
+    needs: create-release-tag
+    if: ${{ inputs.smoke_test_confirmed == 'yes' && inputs.docker_build == 'yes' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Compute image metadata
+        id: meta
+        run: |
+          IMAGE_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "image_name=${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Docker image (no push)
+        if: ${{ inputs.docker_push != 'yes' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend_code/Dockerfile
+          push: false
+          tags: ${{ steps.meta.outputs.image_name }}:v${{ inputs.version }}
+
+      - name: Log in to Docker Hub
+        if: ${{ inputs.docker_push == 'yes' }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        if: ${{ inputs.docker_push == 'yes' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend_code/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/socialsphere:v${{ inputs.version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/socialsphere:latest
+
+  auto-deploy:
+    runs-on: ubuntu-latest
+    needs:
+      - create-release-tag
+      - docker-image
+    if: ${{ always() && inputs.smoke_test_confirmed == 'yes' && inputs.auto_deploy == 'yes' && needs.create-release-tag.result == 'success' && (needs.docker-image.result == 'success' || needs.docker-image.result == 'skipped') }}
+
+    steps:
+      - name: Trigger Render deploy hook
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "${RENDER_DEPLOY_HOOK_URL}" ]; then
+            echo "RENDER_DEPLOY_HOOK_URL is not set; skipping Render deploy hook"
+            exit 0
+          fi
+          curl -fsS -X POST "${RENDER_DEPLOY_HOOK_URL}"
+
+      - name: Trigger Railway deploy hook
+        env:
+          RAILWAY_DEPLOY_HOOK_URL: ${{ secrets.RAILWAY_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "${RAILWAY_DEPLOY_HOOK_URL}" ]; then
+            echo "RAILWAY_DEPLOY_HOOK_URL is not set; skipping Railway deploy hook"
+            exit 0
+          fi
+          curl -fsS -X POST "${RAILWAY_DEPLOY_HOOK_URL}"
+
+  notify-release:
+    runs-on: ubuntu-latest
+    needs:
+      - create-release-tag
+      - auto-deploy
+    if: ${{ always() && inputs.smoke_test_confirmed == 'yes' && inputs.notify_after_release == 'yes' && needs.create-release-tag.result == 'success' }}
+
+    steps:
+      - name: Send webhook notification
+        env:
+          RELEASE_NOTIFY_WEBHOOK_URL: ${{ secrets.RELEASE_NOTIFY_WEBHOOK_URL }}
+        run: |
+          if [ -z "${RELEASE_NOTIFY_WEBHOOK_URL}" ]; then
+            echo "RELEASE_NOTIFY_WEBHOOK_URL is not set; skipping release notification"
+            exit 0
+          fi
+          curl -fsS -X POST "${RELEASE_NOTIFY_WEBHOOK_URL}" \
+            -H "Content-Type: application/json" \
+            -d '{"text":"Release v${{ inputs.version }} completed for ${{ github.repository }}"}'
+
+  blocked-until-smoke-tests:
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    if: ${{ inputs.smoke_test_confirmed != 'yes' }}
+
+    steps:
+      - name: Stop release until smoke tests are confirmed
+        run: |
+          echo "Smoke tests are not confirmed."
+          echo "Re-run this workflow with smoke_test_confirmed=yes after completing DEPLOYMENT_RUNBOOK.md checks."
+          exit 1

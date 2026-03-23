@@ -1,12 +1,14 @@
 # Python virtual environment
 .venv/
 venv/
+node_modules/
 
 # Python cache
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+*.pyc
 
 # Environment files
 .env
@@ -20,3 +22,10 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Generated local audit/report outputs
+artifacts/
+
+# Build and coverage outputs
+dist/
+.coverage

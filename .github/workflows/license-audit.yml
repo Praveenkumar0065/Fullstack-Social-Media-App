@@ -1,0 +1,79 @@
+name: License Audit
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - backend_code/requirements.txt
+      - frontend_react/package.json
+      - frontend_react/package-lock.json
+      - scripts/check_dependency_licenses.py
+      - scripts/generate_license_dashboard.py
+      - THIRD_PARTY_NOTICES.md
+      - .github/workflows/license-audit.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - backend_code/requirements.txt
+      - frontend_react/package.json
+      - frontend_react/package-lock.json
+      - scripts/check_dependency_licenses.py
+      - scripts/generate_license_dashboard.py
+      - THIRD_PARTY_NOTICES.md
+      - .github/workflows/license-audit.yml
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install frontend dependencies
+        working-directory: frontend_react
+        run: npm ci
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend_code/requirements.txt
+
+      - name: Validate dependency licenses
+        run: |
+          python scripts/check_dependency_licenses.py --verify-notices --strict \
+            --allowed-license MIT \
+            --allowed-license Apache-2.0 \
+            --allowed-license BSD-3-Clause \
+            --allowed-license BSD \
+            --allowed-license Unlicense \
+            --allowed-license ISC \
+            --fail-on-risk medium \
+            --report-json artifacts/license-compliance.json
+
+      - name: Build HTML compliance dashboard
+        run: |
+          python scripts/generate_license_dashboard.py --input artifacts/license-compliance.json --output artifacts/license-compliance.html --title "License Compliance Dashboard"
+
+      - name: Upload compliance report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-compliance-report
+          path: |
+            artifacts/license-compliance.json
+            artifacts/license-compliance.html
+          if-no-files-found: warn

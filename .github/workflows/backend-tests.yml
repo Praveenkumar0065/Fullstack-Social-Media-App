@@ -1,0 +1,63 @@
+name: Backend Tests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - backend_code/**
+      - frontend_code/**
+      - .github/workflows/backend-tests.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - backend_code/**
+      - frontend_code/**
+      - .github/workflows/backend-tests.yml
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend_code/requirements.txt
+          pip install -r backend_code/requirements-dev.txt
+
+      - name: Run backend tests
+        run: pytest --cov=backend_code --cov-report=term-missing --cov-fail-under=60 -q backend_code/tests
+
+      - name: Run release tooling tests
+        run: pytest -q tests
+
+      - name: Compile backend modules
+        run: python -m compileall backend_code
+
+  test-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Frontend syntax checks
+        run: |
+          node --check frontend_code/app.js
+          node --check frontend_code/firebase-config.js
