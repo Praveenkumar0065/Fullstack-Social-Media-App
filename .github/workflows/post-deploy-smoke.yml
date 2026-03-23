@@ -23,6 +23,11 @@ on:
         options:
           - "no"
           - "yes"
+      expected_version:
+        description: "Expected deployed backend version (optional; defaults to VERSION file)"
+        required: false
+        default: ""
+        type: string
 
 jobs:
   smoke:
@@ -40,8 +45,14 @@ jobs:
           SMOKE_USER_EMAIL: ${{ secrets.SMOKE_USER_EMAIL }}
           SMOKE_USER_PASSWORD: ${{ secrets.SMOKE_USER_PASSWORD }}
         run: |
+          $expectedVersion = "${{ inputs.expected_version }}".Trim()
+          if (-not $expectedVersion) {
+            $expectedVersion = (Get-Content ./VERSION -Raw).Trim()
+          }
+
           $args = @{
             BaseUrl = "${{ inputs.base_url }}"
+            ExpectedVersion = $expectedVersion
           }
 
           if ($env:SMOKE_ADMIN_EMAIL) {

@@ -195,6 +195,7 @@ This repository also includes .github/workflows/post-deploy-smoke.yml.
 
 It can be run manually after deployment to execute scripts/smoke_test.ps1 against a live Render URL.
 Use workflow inputs for base URL and optional checks (rate-limit and non-admin guard validation).
+You can also pass expected_version (or leave it blank to use the VERSION file) for deploy-version verification.
 
 One-command local release checklist wrapper is available at scripts/release_checklist.ps1:
 - Runs backend checks

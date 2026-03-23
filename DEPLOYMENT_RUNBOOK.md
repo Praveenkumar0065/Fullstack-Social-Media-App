@@ -72,6 +72,7 @@ Required input:
 Optional workflow flags:
 - run_rate_limit = yes/no
 - run_non_admin_check = yes/no
+- expected_version = v1.0.1 (optional; defaults to VERSION file when blank)
 
 Optional secrets for workflow:
 - SMOKE_ADMIN_EMAIL
