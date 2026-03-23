@@ -12,6 +12,8 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$SupportsWebRequestBasicParsing = (Get-Command Invoke-WebRequest).Parameters.ContainsKey("UseBasicParsing")
+$SupportsRestMethodBasicParsing = (Get-Command Invoke-RestMethod).Parameters.ContainsKey("UseBasicParsing")
 
 function Normalize-BaseUrl {
     param([string]$Url)
@@ -76,6 +78,14 @@ function Invoke-JsonRequest {
     if ($Body -ne $null) {
         $params.ContentType = "application/json"
         $params.Body = ($Body | ConvertTo-Json -Depth 10)
+    }
+
+    # PowerShell 5 may prompt interactively unless basic parsing is forced.
+    if ($Raw -and $SupportsWebRequestBasicParsing) {
+        $params.UseBasicParsing = $true
+    }
+    elseif ((-not $Raw) -and $SupportsRestMethodBasicParsing) {
+        $params.UseBasicParsing = $true
     }
 
     if ($Raw) {
