@@ -56,6 +56,22 @@ function Write-Warn {
     Write-Host "[WARN] $Name - $Detail" -ForegroundColor Yellow
 }
 
+function Normalize-VersionToken {
+    param([string]$Value)
+
+    $token = [string]$Value
+    if ([string]::IsNullOrWhiteSpace($token)) {
+        return ""
+    }
+
+    $token = $token.Trim()
+    if ($token.StartsWith("v", [System.StringComparison]::OrdinalIgnoreCase)) {
+        return $token.Substring(1)
+    }
+
+    return $token
+}
+
 function Invoke-JsonRequest {
     param(
         [string]$Method,
@@ -150,7 +166,10 @@ try {
             try {
                 $healthJson = $healthRaw.Content | ConvertFrom-Json
                 $actualVersion = [string]$healthJson.version
-                if ($actualVersion -eq $ExpectedVersion) {
+                $actualNormalized = Normalize-VersionToken -Value $actualVersion
+                $expectedNormalized = Normalize-VersionToken -Value $ExpectedVersion
+
+                if ($actualNormalized -and $actualNormalized -eq $expectedNormalized) {
                     Write-Pass "Health version" "expected $ExpectedVersion"
                 }
                 elseif ($actualVersion) {

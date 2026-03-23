@@ -168,6 +168,9 @@ Detailed deployment instructions are available in:
 - DEPLOYMENT_RUNBOOK.md
 - GLOBAL_LAUNCH_GUIDE.md
 
+Quick post-deploy validation helper:
+- powershell -ExecutionPolicy Bypass -File scripts/post_deploy_verify.ps1 -BaseUrl https://<your-render-service>.onrender.com
+
 ## Continuous Integration
 
 This repository includes a GitHub Actions workflow at .github/workflows/backend-tests.yml.

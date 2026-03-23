@@ -55,6 +55,8 @@ Run these checks immediately after each production deploy. Replace <BASE_URL> wi
 Use the automation script to run the key checks end-to-end:
 
   - powershell -ExecutionPolicy Bypass -File scripts/smoke_test.ps1 -BaseUrl https://<your-render-service>.onrender.com
+- One-command deploy verification using VERSION file:
+  - powershell -ExecutionPolicy Bypass -File scripts/post_deploy_verify.ps1 -BaseUrl https://<your-render-service>.onrender.com
 - With explicit non-admin guard validation:
   - powershell -ExecutionPolicy Bypass -File scripts/smoke_test.ps1 -BaseUrl https://<your-render-service>.onrender.com -UserEmail <non-admin-email> -UserPassword <non-admin-password>
   - powershell -ExecutionPolicy Bypass -File scripts/smoke_test.ps1 -BaseUrl https://<your-render-service>.onrender.com -RunRateLimit
