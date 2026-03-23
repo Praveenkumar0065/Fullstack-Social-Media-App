@@ -51,10 +51,10 @@ ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*")
 SENTRY_DSN = os.getenv("SENTRY_DSN", "").strip()
 SENTRY_TRACES_SAMPLE_RATE = float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.0"))
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-FRONTEND_DIR_CANDIDATES = [
-    PROJECT_ROOT / "frontend_react" / "dist",
-    PROJECT_ROOT / "frontend_code",
-]
+USE_LEGACY_FRONTEND_FALLBACK = os.getenv("USE_LEGACY_FRONTEND_FALLBACK", "false").strip().lower() in {"1", "true", "yes"}
+FRONTEND_DIR_CANDIDATES = [PROJECT_ROOT / "frontend_react" / "dist"]
+if USE_LEGACY_FRONTEND_FALLBACK:
+    FRONTEND_DIR_CANDIDATES.append(PROJECT_ROOT / "frontend_code")
 FRONTEND_DIR = next((path for path in FRONTEND_DIR_CANDIDATES if path.exists()), FRONTEND_DIR_CANDIDATES[0])
 INDEX_FILE = FRONTEND_DIR / "index.html"
 

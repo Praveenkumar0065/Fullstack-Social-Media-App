@@ -146,6 +146,10 @@ Script coverage:
   - Confirm ALLOWED_ORIGINS value in Render env vars if needed.
 - Health check failing:
   - Verify /health route returns HTTP 200.
+- Old template UI still showing after deploy:
+  - Confirm Render is on latest main commit and APP_VERSION is current.
+  - Hard refresh browser (Ctrl+F5) and clear site storage/service worker cache.
+  - Legacy frontend fallback is disabled by default; enable USE_LEGACY_FRONTEND_FALLBACK=true only for temporary rollback.
 
 ## Rollback
 1. In Render service, open Deploys tab.

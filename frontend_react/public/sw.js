@@ -1,4 +1,4 @@
-const CACHE_NAME = "pulsegram-v1";
+const CACHE_NAME = "pulsegram-v101";
 const ASSETS = ["/", "/manifest.webmanifest", "/icons/icon-192.svg", "/icons/icon-512.svg"];
 
 self.addEventListener("install", (event) => {
