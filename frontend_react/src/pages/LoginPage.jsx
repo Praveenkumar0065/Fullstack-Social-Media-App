@@ -18,7 +18,10 @@ export default function LoginPage() {
       await login(email, password);
       navigate("/feed", { replace: true });
     } catch (err) {
-      setError(err?.response?.data?.detail || "Login failed.");
+      setError(
+        err?.response?.data?.detail ||
+          (err?.request ? "Cannot reach server. Please check deployment API settings." : "Login failed.")
+      );
     } finally {
       setLoading(false);
     }

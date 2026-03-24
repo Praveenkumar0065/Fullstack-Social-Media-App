@@ -5,13 +5,15 @@ const runtimeApiBase =
     ? String(window.SOCIALSPHERE_API_BASE)
     : "";
 
-const browserSameOriginApiBase =
-  typeof window !== "undefined" && window.location && window.location.origin
-    ? `${window.location.origin}/api`
-    : "";
+const defaultApiBase = (() => {
+  if (typeof window === "undefined") return "/api";
+  const { hostname, port } = window.location;
+  const isLocalViteDev = (hostname === "localhost" || hostname === "127.0.0.1") && port === "5173";
+  return isLocalViteDev ? "http://127.0.0.1:8000/api" : "/api";
+})();
 
 export const API_BASE =
-  (import.meta.env.VITE_API_BASE || runtimeApiBase || browserSameOriginApiBase || "http://127.0.0.1:8000/api").replace(/\/$/, "");
+  (import.meta.env.VITE_API_BASE || runtimeApiBase || defaultApiBase).replace(/\/$/, "");
 
 export const api = axios.create({
   baseURL: API_BASE,

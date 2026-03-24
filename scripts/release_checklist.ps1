@@ -43,6 +43,18 @@ function Assert-Command {
     }
 }
 
+function Invoke-External {
+    param(
+        [string]$Name,
+        [ScriptBlock]$Action
+    )
+
+    & $Action
+    if ($LASTEXITCODE -ne 0) {
+        throw "$Name failed with exit code $LASTEXITCODE"
+    }
+}
+
 Assert-Command -Command "npm"
 if (-not (Test-Path $PythonExe)) {
     throw "Python executable not found: $PythonExe"
@@ -54,9 +66,15 @@ Invoke-Step -Name "Backend unit tests" -Action {
         return
     }
 
-    & $PythonExe -m pytest --cov=backend_code --cov-report=term-missing --cov-fail-under=60 -q backend_code/tests
-    & $PythonExe -m pytest -q tests
-    & $PythonExe -m compileall backend_code
+    Invoke-External -Name "backend coverage tests" -Action {
+        & $PythonExe -m pytest --cov=backend_code --cov-report=term-missing --cov-fail-under=60 -q backend_code/tests
+    }
+    Invoke-External -Name "release tooling tests" -Action {
+        & $PythonExe -m pytest -q tests
+    }
+    Invoke-External -Name "backend compile check" -Action {
+        & $PythonExe -m compileall backend_code
+    }
 }
 
 Invoke-Step -Name "Frontend production build" -Action {
@@ -67,8 +85,12 @@ Invoke-Step -Name "Frontend production build" -Action {
 
     Push-Location frontend_react
     try {
-        npm ci
-        npm run build
+        Invoke-External -Name "frontend install" -Action {
+            npm ci
+        }
+        Invoke-External -Name "frontend build" -Action {
+            npm run build
+        }
     }
     finally {
         Pop-Location
@@ -81,17 +103,21 @@ Invoke-Step -Name "License compliance audit" -Action {
         return
     }
 
-    & $PythonExe scripts/check_dependency_licenses.py --verify-notices --strict `
-        --allowed-license MIT `
-        --allowed-license Apache-2.0 `
-        --allowed-license BSD-3-Clause `
-        --allowed-license BSD `
-        --allowed-license Unlicense `
-        --allowed-license ISC `
-        --fail-on-risk medium `
-        --report-json artifacts/license-compliance-local.json
+    Invoke-External -Name "license compliance audit" -Action {
+        & $PythonExe scripts/check_dependency_licenses.py --verify-notices --strict `
+            --allowed-license MIT `
+            --allowed-license Apache-2.0 `
+            --allowed-license BSD-3-Clause `
+            --allowed-license BSD `
+            --allowed-license Unlicense `
+            --allowed-license ISC `
+            --fail-on-risk medium `
+            --report-json artifacts/license-compliance-local.json
+    }
 
-    & $PythonExe scripts/generate_license_dashboard.py --input artifacts/license-compliance-local.json --output artifacts/license-compliance-local.html --title "Local License Compliance Dashboard"
+    Invoke-External -Name "license dashboard generation" -Action {
+        & $PythonExe scripts/generate_license_dashboard.py --input artifacts/license-compliance-local.json --output artifacts/license-compliance-local.html --title "Local License Compliance Dashboard"
+    }
 }
 
 Invoke-Step -Name "Post-deploy smoke tests" -Action {
@@ -110,7 +136,9 @@ Invoke-Step -Name "Post-deploy smoke tests" -Action {
         $smokeArgs.RunRateLimit = $true
     }
 
-    ./scripts/smoke_test.ps1 @smokeArgs
+    Invoke-External -Name "post-deploy smoke tests" -Action {
+        ./scripts/smoke_test.ps1 @smokeArgs
+    }
 }
 
 Write-Host ""

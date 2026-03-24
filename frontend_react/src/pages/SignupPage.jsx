@@ -19,7 +19,10 @@ export default function SignupPage() {
       await signup(name, email, password);
       navigate("/feed", { replace: true });
     } catch (err) {
-      setError(err?.response?.data?.detail || "Signup failed.");
+      setError(
+        err?.response?.data?.detail ||
+          (err?.request ? "Cannot reach server. Please check deployment API settings." : "Signup failed.")
+      );
     } finally {
       setLoading(false);
     }
