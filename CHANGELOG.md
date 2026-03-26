@@ -5,6 +5,9 @@ All notable changes to this project are documented in this file.
 This changelog is automatically prepended during release workflow runs.
 
 ## Unreleased
+- No unreleased changes.
+
+## v1.0.2 - 2026-03-26
 - Polished login/signup UI with closer split-panel styling, refined spacing, and improved mobile/desktop presentation.
 - Added invite and onboarding frontend routes/pages and integrated referral-aware signup UX.
 - Hardened backend auth request validation by requiring proper email format for signup/login payloads.
