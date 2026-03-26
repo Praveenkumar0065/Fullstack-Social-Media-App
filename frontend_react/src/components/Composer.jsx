@@ -13,7 +13,7 @@ export default function Composer({ onSubmit, busy }) {
 
   return (
     <form onSubmit={handleSubmit} className="card-surface p-4">
-      <label htmlFor="post-text" className="mb-2 block text-sm font-semibold text-slate-700">
+      <label htmlFor="post-text" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
         Share an update
       </label>
       <textarea
@@ -22,7 +22,7 @@ export default function Composer({ onSubmit, busy }) {
         onChange={(e) => setText(e.target.value)}
         placeholder="What are you building today?"
         rows={4}
-        className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none transition focus:border-teal-500"
+        className="w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900 outline-none transition focus:border-teal-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:placeholder:text-slate-500 dark:focus:border-teal-400"
       />
       <div className="mt-3 flex justify-end">
         <button

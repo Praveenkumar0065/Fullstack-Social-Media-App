@@ -22,6 +22,19 @@ body {
   margin: 0;
 }
 
+/* Dark mode base styles */
+.dark {
+  @apply bg-slate-950 text-slate-100;
+  background:
+    radial-gradient(800px 600px at 10% 20%, rgba(20, 184, 166, 0.15), transparent 40%),
+    radial-gradient(600px 400px at 90% 80%, rgba(59, 130, 246, 0.1), transparent 35%),
+    linear-gradient(180deg, #0f172a 0%, #1a1f35 100%);
+}
+
+.dark body {
+  background: transparent;
+}
+
 h1, h2, h3 {
   font-family: "Space Grotesk", sans-serif;
 }
@@ -38,16 +51,34 @@ h1, h2, h3 {
     #f8fafc;
 }
 
+.dark .auth-bg {
+  background:
+    radial-gradient(circle at 10% 20%, rgba(15, 159, 110, 0.1), transparent 35%),
+    radial-gradient(circle at 90% 15%, rgba(59, 130, 246, 0.12), transparent 35%),
+    radial-gradient(circle at 80% 80%, rgba(251, 146, 60, 0.08), transparent 30%),
+    #0f172a;
+}
+
 .card-surface {
   @apply rounded-2xl border bg-white/90 backdrop-blur;
   border-color: var(--stroke-soft);
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
 }
 
+.dark .card-surface {
+  @apply bg-slate-900/60 border-slate-700;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
 .card-surface-soft {
   @apply rounded-2xl border bg-white/70 backdrop-blur;
   border-color: var(--stroke-soft);
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+}
+
+.dark .card-surface-soft {
+  @apply bg-slate-800/50 border-slate-700;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
 }
 
 .brand-button {
@@ -66,6 +97,11 @@ h1, h2, h3 {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(241, 247, 252, 0.92));
 }
 
+.dark .page-hero {
+  border-color: #334155;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.92));
+}
+
 .app-frame {
   @apply min-h-screen;
   background:
@@ -74,6 +110,18 @@ h1, h2, h3 {
       45deg,
       rgba(15, 23, 42, 0.02) 0,
       rgba(15, 23, 42, 0.02) 1px,
+      transparent 1px,
+      transparent 20px
+    );
+}
+
+.dark .app-frame {
+  background:
+    linear-gradient(120deg, rgba(13, 148, 136, 0.08), rgba(245, 158, 11, 0.05)),
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.02) 0,
+      rgba(255, 255, 255, 0.02) 1px,
       transparent 1px,
       transparent 20px
     );
@@ -120,6 +168,132 @@ button:active:not(:disabled) {
   box-shadow: 0 22px 46px rgba(15, 23, 42, 0.14);
 }
 
+.auth-split-card {
+  @apply relative z-10 grid w-full max-w-3xl overflow-hidden rounded-2xl;
+  background: #090a12;
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.46);
+  grid-template-columns: 1fr;
+  min-height: 22rem;
+}
+
+.auth-pane {
+  @apply p-7 sm:p-9;
+}
+
+.auth-pane-form {
+  background: linear-gradient(145deg, #0b0c16 0%, #111423 100%);
+}
+
+.auth-pane-title {
+  @apply text-4xl font-bold;
+  font-family: "Space Grotesk", sans-serif;
+  color: #f8fafc;
+}
+
+.auth-pane-subtitle {
+  @apply mt-1 text-xs;
+  color: #94a3b8;
+}
+
+.auth-input-row {
+  @apply flex items-center gap-2 rounded-lg px-2.5 py-1.5;
+  border: 1px solid #1f2937;
+  background: #151a29;
+}
+
+.auth-input-row:focus-within {
+  border-color: #d946ef;
+  box-shadow: 0 0 0 3px rgba(217, 70, 239, 0.2);
+}
+
+.auth-input-icon {
+  @apply inline-flex h-5 w-5 items-center justify-center rounded text-[11px] font-bold;
+  background: rgba(148, 163, 184, 0.16);
+  color: #9ca3af;
+}
+
+.auth-neo-input {
+  @apply w-full border-0 bg-transparent px-0 py-1.5 text-sm outline-none transition;
+  box-shadow: none;
+  color: #e2e8f0;
+}
+
+.auth-neo-input::placeholder {
+  color: #64748b;
+}
+
+.auth-neo-input:focus {
+  box-shadow: none;
+}
+
+.auth-primary-action {
+  @apply rounded-full px-4 py-2.5 text-xs font-bold tracking-wide text-black transition;
+  background: linear-gradient(120deg, #f0abfc, #d946ef 65%, #a21caf);
+}
+
+.auth-primary-action:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 8px 20px rgba(217, 70, 239, 0.35);
+}
+
+.auth-inline-error {
+  @apply mt-3 rounded-lg px-3 py-2 text-sm;
+  background: rgba(244, 63, 94, 0.2);
+  color: #fecdd3;
+  border: 1px solid rgba(244, 63, 94, 0.35);
+}
+
+.auth-inline-note {
+  @apply mt-3 rounded-lg px-3 py-2 text-xs font-semibold;
+  background: rgba(45, 212, 191, 0.18);
+  color: #99f6e4;
+  border: 1px solid rgba(45, 212, 191, 0.35);
+}
+
+.auth-pane-cta {
+  @apply flex flex-col items-center justify-center text-center;
+  background: linear-gradient(165deg, #d946ef 0%, #a21caf 58%, #86198f 100%);
+}
+
+.auth-pane-cta-title {
+  @apply text-4xl font-bold;
+  font-family: "Space Grotesk", sans-serif;
+  color: #09090b;
+}
+
+.auth-pane-cta-subtitle {
+  @apply mt-3 max-w-xs text-sm;
+  color: rgba(9, 9, 11, 0.78);
+}
+
+.auth-secondary-action {
+  @apply mt-6 inline-flex rounded-full px-7 py-2 text-xs font-bold tracking-wide no-underline transition;
+  color: #09090b;
+  border: 1px solid rgba(9, 9, 11, 0.38);
+}
+
+.auth-secondary-action:hover {
+  background: rgba(9, 9, 11, 0.08);
+}
+
+@media (min-width: 900px) {
+  .auth-split-card {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 899px) {
+  .auth-pane-cta {
+    order: -1;
+    min-height: 220px;
+  }
+}
+
+.dark .auth-card {
+  @apply border-slate-700 bg-slate-900/85;
+  box-shadow: 0 22px 46px rgba(0, 0, 0, 0.4);
+}
+
 .field-input {
   @apply w-full rounded-xl border border-slate-300 bg-white p-3 text-sm outline-none transition;
 }
@@ -127,6 +301,19 @@ button:active:not(:disabled) {
 .field-input:focus {
   border-color: #14b8a6;
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.16);
+}
+
+.dark .field-input {
+  @apply border-slate-600 bg-slate-800 text-slate-300;
+}
+
+.dark .field-input::placeholder {
+  color: #64748b;
+}
+
+.dark .field-input:focus {
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.3);
 }
 
 .page-enter {
@@ -162,9 +349,19 @@ button:active:not(:disabled) {
   color: #047857;
 }
 
+.dark .status-chip-connected {
+  background: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+}
+
 .status-chip-connecting {
   background: rgba(245, 158, 11, 0.16);
   color: #b45309;
+}
+
+.dark .status-chip-connecting {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
 }
 
 .status-chip-error,
@@ -173,9 +370,21 @@ button:active:not(:disabled) {
   color: #be123c;
 }
 
+.dark .status-chip-error,
+.dark .status-chip-disconnected {
+  background: rgba(244, 63, 94, 0.2);
+  color: #f87171;
+}
+
 .skeleton {
   border-radius: 0.75rem;
   background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
+.dark .skeleton {
+  background: linear-gradient(90deg, #334155 25%, #475569 37%, #334155 63%);
   background-size: 400% 100%;
   animation: skeleton-shimmer 1.2s ease-in-out infinite;
 }
@@ -266,12 +475,12 @@ html.dark .page-hero {
 
 html.dark .field-input {
   background: rgba(15, 23, 42, 0.88);
-  color: #e2e8f0;
+  color: #cbd5e1;
   border-color: #475569;
 }
 
 html.dark .field-input::placeholder {
-  color: #94a3b8;
+  color: #64748b;
 }
 
 html.dark .bg-white,

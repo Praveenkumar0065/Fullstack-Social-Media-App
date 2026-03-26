@@ -45,8 +45,8 @@ export default function ExplorePage() {
   return (
     <section className="page-enter space-y-4 pb-20 md:pb-4">
       <div className="page-hero">
-        <h1 className="text-3xl font-bold tracking-tight">Explore</h1>
-        <p className="text-sm text-slate-600">Discover creators, collaborators, and communities.</p>
+        <h1 className="text-3xl font-bold tracking-tight dark:text-white">Explore</h1>
+        <p className="text-sm text-slate-600 dark:text-slate-400">Discover creators, collaborators, and communities.</p>
       </div>
 
       <form onSubmit={onSearch} className="card-surface flex gap-2 p-3">
@@ -54,12 +54,12 @@ export default function ExplorePage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by name or email"
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none transition focus:border-teal-500"
+          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-teal-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:placeholder:text-slate-500 dark:focus:border-teal-400"
         />
         <button className="brand-button px-4 py-2">Search</button>
       </form>
 
-      {error && <p className="rounded-xl bg-rose-100 px-3 py-2 text-sm text-rose-700">{error}</p>}
+      {error && <p className="rounded-xl bg-rose-100 px-3 py-2 text-sm text-rose-700 dark:bg-rose-950 dark:text-rose-300">{error}</p>}
       {loading ? (
         <div className="space-y-3">
           {[0, 1, 2, 3].map((idx) => (
@@ -83,9 +83,9 @@ export default function ExplorePage() {
             style={{ animationDelay: `${idx * 45}ms` }}
           >
             <div>
-              <h3 className="text-sm font-bold text-slate-900">{u.name}</h3>
-              <p className="text-xs text-slate-500">{u.email}</p>
-              <p className="text-xs text-slate-600">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">{u.name}</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400">{u.email}</p>
+              <p className="text-xs text-slate-700 dark:text-slate-300">
                 {u.followers_count} followers • {u.following_count} following
               </p>
             </div>
@@ -93,8 +93,8 @@ export default function ExplorePage() {
               onClick={() => toggleFollow(u)}
               className={`rounded-lg px-3 py-1.5 text-xs font-bold ${
                 u.is_following
-                  ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-                  : "bg-gradient-to-r from-teal-700 to-teal-500 text-white"
+                  ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                  : "bg-gradient-to-r from-teal-700 to-teal-500 text-white dark:from-teal-600 dark:to-teal-400"
               }`}
             >
               {u.is_following ? "Following" : "Follow"}
@@ -104,7 +104,7 @@ export default function ExplorePage() {
       </div>
 
       {!loading && users.length === 0 ? (
-        <p className="text-sm text-slate-600">No users found.</p>
+        <p className="text-sm text-slate-600 dark:text-slate-400">No users found.</p>
       ) : null}
     </section>
   );

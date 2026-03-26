@@ -40,8 +40,10 @@ try:
         LoginRequest,
         MessageResponse,
         MessagesResponse,
+        InviteSummaryResponse,
         NotificationItem,
         NotificationsResponse,
+        OnboardingStatusResponse,
         PostCreateRequest,
         PostResponse,
         PostsResponse,
@@ -85,8 +87,10 @@ except ModuleNotFoundError:
         LoginRequest,
         MessageResponse,
         MessagesResponse,
+        InviteSummaryResponse,
         NotificationItem,
         NotificationsResponse,
+        OnboardingStatusResponse,
         PostCreateRequest,
         PostResponse,
         PostsResponse,
@@ -153,6 +157,11 @@ users_store = {
         "role": "admin",
         "followers": [],
         "following": [],
+        "invite_code": "ADMIN001",
+        "referred_by": "",
+        "invites_count": 0,
+        "badges": [],
+        "onboarding_completed": True,
     }
 }
 
@@ -182,6 +191,42 @@ messages_store = {
         {"from_user": "Leo", "text": "Check explore", "created": _now_ms()},
     ]
 }
+
+
+def _generate_invite_code(seed_email: str) -> str:
+    local = str(seed_email or "user").split("@", 1)[0].strip().upper()
+    prefix = "".join([ch for ch in local if ch.isalnum()])[:4] or "USER"
+    return f"{prefix}{uuid4().hex[:6].upper()}"
+
+
+def _build_invite_link(code: str) -> str:
+    public_base = os.getenv("PUBLIC_APP_URL", "").strip().rstrip("/")
+    if public_base:
+        return f"{public_base}/invite?code={code}"
+    return f"/invite?code={code}"
+
+
+def _find_user_by_invite_code(invite_code: str):
+    code = str(invite_code or "").strip().upper()
+    if not code:
+        return None
+
+    users_col = _users_collection()
+    if users_col is not None:
+        return users_col.find_one({"invite_code": code})
+
+    for user in users_store.values():
+        if str(user.get("invite_code", "")).upper() == code:
+            return user
+    return None
+
+
+def _award_referral_badge_if_needed(user_doc: dict):
+    invites = int(user_doc.get("invites_count", 0))
+    badges = list(user_doc.get("badges", []))
+    if invites >= 3 and "referral-starter" not in badges:
+        badges.append("referral-starter")
+    return badges
 
 
 def _users_collection():
@@ -256,6 +301,11 @@ def _public_user(user_data: dict) -> UserPublic:
         role=user_data.get("role", "user"),
         followers=user_data.get("followers", []),
         following=user_data.get("following", []),
+        invite_code=str(user_data.get("invite_code", "")),
+        referred_by=str(user_data.get("referred_by", "")),
+        invites_count=int(user_data.get("invites_count", 0)),
+        badges=list(user_data.get("badges", [])),
+        onboarding_completed=bool(user_data.get("onboarding_completed", False)),
     )
 
 
@@ -265,10 +315,17 @@ def _enforce_rate(scope: str, actor: str, max_actions: int = 20, window_seconds:
         raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Rate limit exceeded")
 
 
+def _authenticated_email(current_user: dict) -> str:
+    email = str((current_user or {}).get("email", "")).lower().strip()
+    if not email:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    return email
+
+
 @api_router.post("/upload", responses={400: {"model": ErrorResponse}, 503: {"model": ErrorResponse}})
 async def upload_image(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
     """Upload image to Cloudinary and return URL"""
-    actor = str(current_user.get("email", "")).lower().strip()
+    actor = _authenticated_email(current_user)
     
     # Check if Cloudinary is configured
     if not _cloudinary_ready():
@@ -377,6 +434,18 @@ async def status_endpoint():
 async def signup(payload: SignupRequest):
     email_key = payload.email.lower().strip()
     _enforce_rate("auth_signup", email_key, max_actions=6, window_seconds=60)
+    referral_code = str(payload.referral_code or "").strip().upper()
+    referrer_email = ""
+
+    if referral_code:
+        referrer = _find_user_by_invite_code(referral_code)
+        if not referrer:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid referral code")
+        referrer_email = str(referrer.get("email", "")).lower().strip()
+        if referrer_email == email_key:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot refer yourself")
+
+    invite_code = _generate_invite_code(email_key)
 
     users_col = _users_collection()
     if users_col is not None:
@@ -386,6 +455,9 @@ async def signup(payload: SignupRequest):
                 detail="User already exists",
             )
 
+        while users_col.find_one({"invite_code": invite_code}):
+            invite_code = _generate_invite_code(email_key)
+
         new_user = {
             "name": payload.name.strip(),
             "email": email_key,
@@ -394,11 +466,28 @@ async def signup(payload: SignupRequest):
             "role": "admin" if "admin" in email_key else "user",
             "followers": [],
             "following": [],
+            "invite_code": invite_code,
+            "referred_by": referrer_email,
+            "invites_count": 0,
+            "badges": [],
+            "onboarding_completed": False,
         }
         users_col.insert_one(new_user)
+
+        if referrer_email:
+            referrer_doc = users_col.find_one_and_update(
+                {"email": referrer_email},
+                {"$inc": {"invites_count": 1}},
+                projection={"_id": 0, "email": 1, "invites_count": 1, "badges": 1},
+                return_document=ReturnDocument.AFTER,
+            )
+            if referrer_doc is not None:
+                next_badges = _award_referral_badge_if_needed(referrer_doc)
+                users_col.update_one({"email": referrer_email}, {"$set": {"badges": next_badges}})
+
         refresh_token = create_refresh_token(new_user["email"])
         store_refresh_token(refresh_token, new_user["email"], get_refresh_token_expiry_epoch())
-        audit_log("auth_signup", actor=email_key)
+        audit_log("auth_signup", actor=email_key, metadata={"referred_by": referrer_email})
         logger.info("auth_signup email=%s role=%s", email_key, new_user.get("role", "user"))
         return AuthResponse(
             message="Registered successfully",
@@ -421,10 +510,21 @@ async def signup(payload: SignupRequest):
         "role": "admin" if "admin" in email_key else "user",
         "followers": [],
         "following": [],
+        "invite_code": invite_code,
+        "referred_by": referrer_email,
+        "invites_count": 0,
+        "badges": [],
+        "onboarding_completed": False,
     }
+
+    if referrer_email and referrer_email in users_store:
+        ref_user = users_store[referrer_email]
+        ref_user["invites_count"] = int(ref_user.get("invites_count", 0)) + 1
+        ref_user["badges"] = _award_referral_badge_if_needed(ref_user)
+
     refresh_token = create_refresh_token(email_key)
     store_refresh_token(refresh_token, email_key, get_refresh_token_expiry_epoch())
-    audit_log("auth_signup", actor=email_key)
+    audit_log("auth_signup", actor=email_key, metadata={"referred_by": referrer_email})
     logger.info("auth_signup email=%s role=%s", email_key, users_store[email_key].get("role", "user"))
     return AuthResponse(
         message="Registered successfully",
@@ -523,7 +623,7 @@ async def refresh_tokens(payload: RefreshRequest):
 
 @api_router.post("/auth/logout", response_model=MessageResponse)
 async def logout(payload: RefreshRequest, current_user: dict = Depends(get_current_user)):
-    actor = str(current_user.get("email", "")).lower().strip()
+    actor = _authenticated_email(current_user)
     _enforce_rate("auth_logout", actor, max_actions=20, window_seconds=60)
     revoke_refresh_token(payload.refresh_token)
     audit_log("auth_logout", actor=actor)
@@ -531,9 +631,83 @@ async def logout(payload: RefreshRequest, current_user: dict = Depends(get_curre
     return MessageResponse(message="Logged out successfully")
 
 
+@api_router.get("/growth/invite/me", response_model=InviteSummaryResponse)
+async def my_invite_summary(current_user: dict = Depends(get_current_user)):
+    actor = _authenticated_email(current_user)
+    users_col = _users_collection()
+
+    if users_col is not None:
+        user = users_col.find_one(
+            {"email": actor},
+            {"_id": 0, "invite_code": 1, "invites_count": 1, "badges": 1},
+        )
+    else:
+        user = users_store.get(actor)
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    code = str(user.get("invite_code", "")).strip().upper()
+    if not code:
+        code = _generate_invite_code(actor)
+        if users_col is not None:
+            users_col.update_one({"email": actor}, {"$set": {"invite_code": code}})
+        else:
+            users_store[actor]["invite_code"] = code
+
+    return InviteSummaryResponse(
+        invite_code=code,
+        invite_link=_build_invite_link(code),
+        invites_count=int(user.get("invites_count", 0)),
+        badges=list(user.get("badges", [])),
+    )
+
+
+@api_router.get("/growth/invite/{invite_code}/validate", response_model=MessageResponse)
+async def validate_invite_code(invite_code: str):
+    found = _find_user_by_invite_code(invite_code)
+    if not found:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid invite code")
+    return MessageResponse(message="Invite code is valid")
+
+
+@api_router.get("/growth/onboarding/me", response_model=OnboardingStatusResponse)
+async def onboarding_status(current_user: dict = Depends(get_current_user)):
+    actor = _authenticated_email(current_user)
+    users_col = _users_collection()
+
+    if users_col is not None:
+        user = users_col.find_one({"email": actor}, {"_id": 0, "onboarding_completed": 1})
+    else:
+        user = users_store.get(actor)
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    return OnboardingStatusResponse(onboarding_completed=bool(user.get("onboarding_completed", False)))
+
+
+@api_router.post("/growth/onboarding/complete", response_model=MessageResponse)
+async def complete_onboarding(current_user: dict = Depends(get_current_user)):
+    actor = _authenticated_email(current_user)
+    users_col = _users_collection()
+
+    if users_col is not None:
+        result = users_col.update_one({"email": actor}, {"$set": {"onboarding_completed": True}})
+        if result.matched_count == 0:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    else:
+        if actor not in users_store:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        users_store[actor]["onboarding_completed"] = True
+
+    audit_log("onboarding_complete", actor=actor)
+    return MessageResponse(message="Onboarding completed")
+
+
 @api_router.get("/users/me/social", response_model=SocialGraphResponse)
 async def my_social_graph(current_user: dict = Depends(get_current_user)):
-    key = str(current_user.get("email", "")).lower().strip()
+    key = _authenticated_email(current_user)
     return _resolve_social_graph(key)
 
 
@@ -553,7 +727,7 @@ async def users_directory(
     query_key = query.lower().strip()
     safe_limit = max(1, min(limit, 50))
     safe_offset = max(0, offset)
-    current_key = str(current_user.get("email", "")).lower().strip()
+    current_key = _authenticated_email(current_user)
 
     users_col = _users_collection()
     if users_col is not None:
@@ -630,7 +804,7 @@ async def users_status(current_user: dict = Depends(get_current_user)):
 
 @api_router.get("/users/me/followers", response_model=UsersDirectoryResponse)
 async def my_followers(current_user: dict = Depends(get_current_user)):
-    current_key = str(current_user.get("email", "")).lower().strip()
+    current_key = _authenticated_email(current_user)
 
     users_col = _users_collection()
     if users_col is not None:
@@ -678,7 +852,7 @@ async def my_followers(current_user: dict = Depends(get_current_user)):
 
 @api_router.get("/users/me/following", response_model=UsersDirectoryResponse)
 async def my_following(current_user: dict = Depends(get_current_user)):
-    current_key = str(current_user.get("email", "")).lower().strip()
+    current_key = _authenticated_email(current_user)
 
     users_col = _users_collection()
     if users_col is not None:
@@ -724,7 +898,7 @@ async def my_following(current_user: dict = Depends(get_current_user)):
 
 @api_router.post("/follow/{target_email}", response_model=MessageResponse, responses={404: {"model": ErrorResponse}})
 async def follow_user(target_email: str, current_user: dict = Depends(get_current_user)):
-    follower_email = str(current_user.get("email", "")).lower().strip()
+    follower_email = _authenticated_email(current_user)
     followee_email = target_email.lower().strip()
     _enforce_rate("follow", follower_email, max_actions=30, window_seconds=60)
 
@@ -774,7 +948,7 @@ async def follow_user(target_email: str, current_user: dict = Depends(get_curren
 
 @api_router.post("/unfollow/{target_email}", response_model=MessageResponse, responses={404: {"model": ErrorResponse}})
 async def unfollow_user(target_email: str, current_user: dict = Depends(get_current_user)):
-    follower_email = str(current_user.get("email", "")).lower().strip()
+    follower_email = _authenticated_email(current_user)
     followee_email = target_email.lower().strip()
     _enforce_rate("follow", follower_email, max_actions=30, window_seconds=60)
 
@@ -822,7 +996,7 @@ async def list_posts():
 
 @api_router.post("/posts", response_model=PostResponse, responses={404: {"model": ErrorResponse}})
 async def create_post(payload: PostCreateRequest, current_user: dict = Depends(get_current_user)):
-    current_email = str(current_user.get("email", "")).lower().strip()
+    current_email = _authenticated_email(current_user)
     _enforce_rate("post_create", current_email, max_actions=20, window_seconds=60)
     users_col = _users_collection()
     posts_col = _posts_collection()
@@ -873,7 +1047,7 @@ async def create_post(payload: PostCreateRequest, current_user: dict = Depends(g
 
 @api_router.post("/posts/{post_id}/like", response_model=PostResponse, responses={404: {"model": ErrorResponse}})
 async def like_post(post_id: str, current_user: dict = Depends(get_current_user)):
-    actor_email = str(current_user.get("email", "")).lower().strip()
+    actor_email = _authenticated_email(current_user)
     actor_name = str(current_user.get("name", "User")).strip() or "User"
     posts_col = _posts_collection()
     if posts_col is not None:
@@ -956,7 +1130,7 @@ async def list_comments(post_id: str, limit: int = 200):
 
 @api_router.post("/comments", response_model=CommentItem, responses={404: {"model": ErrorResponse}})
 async def create_comment(payload: CommentCreateBody, current_user: dict = Depends(get_current_user)):
-    actor_email = str(current_user.get("email", "")).lower().strip()
+    actor_email = _authenticated_email(current_user)
     actor_name = str(current_user.get("name", "User")).strip() or "User"
     _enforce_rate("comment_create", actor_email, max_actions=60, window_seconds=60)
 
@@ -995,7 +1169,7 @@ async def create_comment(payload: CommentCreateBody, current_user: dict = Depend
 
 @api_router.post("/comments/{comment_id}/like", response_model=CommentItem, responses={404: {"model": ErrorResponse}})
 async def like_comment(comment_id: str, current_user: dict = Depends(get_current_user)):
-    actor_email = str(current_user.get("email", "")).lower().strip()
+    actor_email = _authenticated_email(current_user)
     actor_name = str(current_user.get("name", "User")).strip() or "User"
     _enforce_rate("comment_like", actor_email, max_actions=120, window_seconds=60)
     updated = like_comment_by_id(comment_id)
@@ -1090,7 +1264,7 @@ async def delete_post(post_id: str):
 
 @api_router.get("/notifications/me", response_model=NotificationsResponse)
 async def my_notifications(current_user: dict = Depends(get_current_user), limit: int = 30):
-    current_key = str(current_user.get("email", "")).lower().strip()
+    current_key = _authenticated_email(current_user)
     notifications = get_user_notifications(current_key, limit=limit)
     if notifications:
         return NotificationsResponse(notifications=[NotificationItem(**item) for item in notifications])
@@ -1101,20 +1275,20 @@ async def my_notifications(current_user: dict = Depends(get_current_user), limit
 
 @api_router.get("/notifications/unread-count")
 async def unread_notifications_count(current_user: dict = Depends(get_current_user)):
-    current_key = str(current_user.get("email", "")).lower().strip()
+    current_key = _authenticated_email(current_user)
     return {"unread_count": get_unread_notifications_count(current_key)}
 
 
 @api_router.post("/notifications/read-all", response_model=MessageResponse)
 async def read_all_notifications(current_user: dict = Depends(get_current_user)):
-    current_key = str(current_user.get("email", "")).lower().strip()
+    current_key = _authenticated_email(current_user)
     changed = mark_all_notifications_read(current_key)
     return MessageResponse(message=f"Marked {changed} notifications as read")
 
 
 @api_router.post("/notifications/{notification_id}/read", response_model=MessageResponse)
 async def read_single_notification(notification_id: str, current_user: dict = Depends(get_current_user)):
-    current_key = str(current_user.get("email", "")).lower().strip()
+    current_key = _authenticated_email(current_user)
     changed = mark_notification_read(user_email=current_key, notification_id=notification_id)
     if not changed:
         return MessageResponse(message="Notification already read")
@@ -1129,7 +1303,7 @@ async def get_notifications(email: str):
 
 @api_router.get("/messages/me", response_model=MessagesResponse)
 async def get_my_messages(current_user: dict = Depends(get_current_user)):
-    key = str(current_user.get("email", "")).lower().strip()
+    key = _authenticated_email(current_user)
 
     messages_col = _messages_collection()
     if messages_col is not None:
@@ -1162,7 +1336,7 @@ async def get_chat_history(room_id: str, limit: int = 50, current_user: dict = D
 
 @api_router.post("/chat/rooms/{room_id}/read", response_model=MessageResponse)
 async def mark_room_read(room_id: str, current_user: dict = Depends(get_current_user)):
-    actor = str(current_user.get("email", "")).lower().strip()
+    actor = _authenticated_email(current_user)
     safe_room = str(room_id or "").strip()
     if not safe_room:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid room")
@@ -1179,7 +1353,7 @@ async def mark_room_read(room_id: str, current_user: dict = Depends(get_current_
 
 @api_router.get("/chat/rooms/recent")
 async def recent_chat_rooms(limit: int = 20, current_user: dict = Depends(get_current_user)):
-    actor = str(current_user.get("email", "")).lower().strip()
+    actor = _authenticated_email(current_user)
     return {"rooms": get_recent_chat_rooms(user_email=actor, limit=limit)}
 
 

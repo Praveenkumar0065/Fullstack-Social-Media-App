@@ -108,13 +108,13 @@ export default function AppShell({ children }) {
 
   return (
     <div className="app-frame">
-      <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/75 backdrop-blur-md">
+      <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/75 backdrop-blur-md dark:border-slate-700 dark:bg-slate-900/75">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
           <Link to="/feed" className="group inline-flex items-center gap-2">
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-700 to-teal-500 text-xs font-bold text-white">
               PG
             </span>
-            <span className="text-xl font-bold tracking-tight text-slate-900 transition group-hover:text-teal-700">
+            <span className="text-xl font-bold tracking-tight text-slate-900 transition group-hover:text-teal-700 dark:text-white dark:group-hover:text-teal-400">
               Pulsegram
             </span>
           </Link>
@@ -127,7 +127,7 @@ export default function AppShell({ children }) {
                   `interactive rounded-lg px-3 py-2 text-sm font-semibold transition ${
                     isActive
                       ? "bg-gradient-to-r from-teal-700 to-teal-500 text-white shadow"
-                      : "text-slate-700 hover:bg-white/90 hover:text-slate-900"
+                      : "text-slate-700 hover:bg-white/90 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                   }`
                 }
               >
@@ -136,26 +136,26 @@ export default function AppShell({ children }) {
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            <span className="hidden rounded-lg bg-slate-100/90 px-2.5 py-1 text-xs font-semibold text-slate-700 sm:block">
+            <span className="hidden rounded-lg bg-slate-100/90 px-2.5 py-1 text-xs font-semibold text-slate-700 sm:block dark:bg-slate-800 dark:text-slate-300">
               {user?.email || "Signed in"}
             </span>
             <button
               onClick={toggleTheme}
-              className="interactive rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+              className="interactive rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:bg-slate-700"
             >
               {theme === "dark" ? "Light" : "Dark"}
             </button>
             {installPromptEvent ? (
               <button
                 onClick={installApp}
-                className="interactive rounded-lg border border-teal-300 bg-teal-50 px-3 py-1.5 text-sm font-semibold text-teal-700 transition hover:bg-teal-100"
+                className="interactive rounded-lg border border-teal-300 bg-teal-50 px-3 py-1.5 text-sm font-semibold text-teal-700 transition hover:bg-teal-100 dark:border-teal-600 dark:bg-teal-950 dark:text-teal-300 dark:hover:bg-teal-900"
               >
                 Install
               </button>
             ) : null}
             <button
               onClick={handleLogout}
-              className="interactive rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+              className="interactive rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:bg-slate-700"
             >
               Logout
             </button>
@@ -165,7 +165,7 @@ export default function AppShell({ children }) {
 
       <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
 
-      <nav className="fixed bottom-0 left-0 right-0 border-t border-slate-200 bg-white/95 p-2 backdrop-blur md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 border-t border-slate-200 bg-white/95 p-2 backdrop-blur md:hidden dark:border-slate-700 dark:bg-slate-900/95">
         <div className="grid grid-cols-6 gap-2">
           {navItems.map((item) => (
             <NavLink
@@ -175,7 +175,7 @@ export default function AppShell({ children }) {
                 `interactive rounded-md px-2 py-2 text-center text-xs font-semibold transition ${
                   isActive
                     ? "bg-gradient-to-r from-teal-700 to-teal-500 text-white"
-                    : "text-slate-700 hover:bg-slate-100"
+                    : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
                 }`
               }
             >

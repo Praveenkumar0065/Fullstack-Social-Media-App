@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class StrictRequestModel(BaseModel):
@@ -25,12 +25,13 @@ class APIInfoResponse(BaseModel):
 
 class SignupRequest(StrictRequestModel):
     name: str = Field(..., min_length=2, max_length=50)
-    email: str = Field(..., min_length=5, max_length=120)
+    email: EmailStr
     password: str = Field(..., min_length=6, max_length=128)
+    referral_code: str = Field(default="", max_length=32)
 
 
 class LoginRequest(StrictRequestModel):
-    email: str = Field(..., min_length=5, max_length=120)
+    email: EmailStr
     password: str = Field(..., min_length=6, max_length=128)
 
 
@@ -41,6 +42,11 @@ class UserPublic(BaseModel):
     role: Literal["user", "admin"] = "user"
     followers: List[str] = Field(default_factory=list)
     following: List[str] = Field(default_factory=list)
+    invite_code: str = ""
+    referred_by: str = ""
+    invites_count: int = 0
+    badges: List[str] = Field(default_factory=list)
+    onboarding_completed: bool = False
 
 
 class AuthResponse(BaseModel):
@@ -152,3 +158,14 @@ class MessageItem(BaseModel):
 
 class MessagesResponse(BaseModel):
     messages: List[MessageItem]
+
+
+class InviteSummaryResponse(BaseModel):
+    invite_code: str
+    invite_link: str
+    invites_count: int = 0
+    badges: List[str] = Field(default_factory=list)
+
+
+class OnboardingStatusResponse(BaseModel):
+    onboarding_completed: bool = False

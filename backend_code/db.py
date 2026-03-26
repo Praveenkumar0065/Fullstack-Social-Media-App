@@ -15,6 +15,7 @@ except ModuleNotFoundError:
 _client = None
 _db = None
 _seeded = False
+_mongo_failed = False
 _refresh_token_store = {}
 _rate_limit_store = {}
 
@@ -65,6 +66,11 @@ def _seed_database(db):
                 "role": "admin",
                 "followers": [],
                 "following": [],
+                "invite_code": "ADMIN001",
+                "referred_by": "",
+                "invites_count": 0,
+                "badges": [],
+                "onboarding_completed": True,
             }
         )
     else:
@@ -75,6 +81,26 @@ def _seed_database(db):
         users.update_one(
             {"email": admin_email, "following": {"$exists": False}},
             {"$set": {"following": []}},
+        )
+        users.update_one(
+            {"email": admin_email, "invite_code": {"$exists": False}},
+            {"$set": {"invite_code": "ADMIN001"}},
+        )
+        users.update_one(
+            {"email": admin_email, "referred_by": {"$exists": False}},
+            {"$set": {"referred_by": ""}},
+        )
+        users.update_one(
+            {"email": admin_email, "invites_count": {"$exists": False}},
+            {"$set": {"invites_count": 0}},
+        )
+        users.update_one(
+            {"email": admin_email, "badges": {"$exists": False}},
+            {"$set": {"badges": []}},
+        )
+        users.update_one(
+            {"email": admin_email, "onboarding_completed": {"$exists": False}},
+            {"$set": {"onboarding_completed": True}},
         )
 
     if posts.count_documents({}) == 0:
@@ -148,6 +174,7 @@ def _seed_database(db):
         )
 
     users.create_index("email", unique=True)
+    users.create_index("invite_code", unique=True, sparse=True)
     posts.create_index([("created", -1)])
     posts.create_index([("author_email", 1), ("created", -1)])
     comments.create_index([("post_id", 1), ("created", -1)])
@@ -164,15 +191,17 @@ def _seed_database(db):
 def get_db():
     global _client
     global _db
+    global _mongo_failed
 
     if _db is not None:
         return _db
+    
+    if _mongo_failed:
+        return None
 
     mongodb_uri = os.getenv("MONGODB_URI", "").strip()
     if not mongodb_uri:
         return None
-
-    db_name = os.getenv("MONGODB_DB", "socialsphere").strip() or "socialsphere"
 
     try:
         _client = MongoClient(mongodb_uri, serverSelectionTimeoutMS=3000)
@@ -183,6 +212,7 @@ def get_db():
     except PyMongoError:
         _client = None
         _db = None
+        _mongo_failed = True
         return None
 
 

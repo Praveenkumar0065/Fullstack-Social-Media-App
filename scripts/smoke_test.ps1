@@ -283,9 +283,10 @@ Assert-Status -Name "Legacy messages deprecated" -Method GET -Url "$BaseUrl/api/
 # 5) Optional rate-limit probes
 if ($RunRateLimit) {
     $hit429 = $false
+    $probeEmail = "rateprobe@example.com"
     for ($i = 1; $i -le 16; $i++) {
         try {
-            Invoke-JsonRequest -Method POST -Url "$BaseUrl/api/auth/login" -Body @{ email = "nobody+$i@example.com"; password = "bad-pass" } | Out-Null
+            Invoke-JsonRequest -Method POST -Url "$BaseUrl/api/auth/login" -Body @{ email = $probeEmail; password = "bad-pass" } | Out-Null
         }
         catch {
             $status = $_.Exception.Response.StatusCode.value__

@@ -226,19 +226,19 @@ export default function MessagesPage() {
   return (
     <section className="page-enter space-y-4 pb-20 md:pb-4">
       <div className="page-hero">
-        <h1 className="text-3xl font-bold tracking-tight">Messages</h1>
-        <p className="text-sm text-slate-600">Direct messaging with live status, seen ticks, and unread badges.</p>
+        <h1 className="text-3xl font-bold tracking-tight dark:text-white">Messages</h1>
+        <p className="text-sm text-slate-600 dark:text-slate-400">Direct messaging with live status, seen ticks, and unread badges.</p>
       </div>
 
-      {error && <p className="rounded-xl bg-rose-100 px-3 py-2 text-sm text-rose-700">{error}</p>}
+      {error && <p className="rounded-xl bg-rose-100 px-3 py-2 text-sm text-rose-700 dark:bg-rose-950 dark:text-rose-300">{error}</p>}
 
       <div className="grid gap-4 lg:grid-cols-3">
         <section className="card-surface p-4">
-          <h2 className="text-lg font-bold">Inbox</h2>
+          <h2 className="text-lg font-bold dark:text-white">Inbox</h2>
           {loading ? (
             <div className="mt-3 space-y-2">
               {[0, 1, 2].map((idx) => (
-                <div key={`inbox-skeleton-${idx}`} className="rounded-xl border border-slate-200 bg-white p-3">
+                <div key={`inbox-skeleton-${idx}`} className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-800/50">
                   <div className="skeleton h-3 w-24" />
                   <div className="mt-2 skeleton h-3 w-full" />
                   <div className="mt-2 skeleton h-3 w-2/3" />
@@ -248,26 +248,26 @@ export default function MessagesPage() {
           ) : null}
           <div className="mt-3 space-y-2">
             {messages.map((m, idx) => (
-              <article key={`${m.created}-${idx}`} className="rounded-xl border border-slate-200 bg-white p-3">
-                <p className="text-xs font-bold text-slate-700">{m.from_user}</p>
-                <p className="text-sm text-slate-800">{m.text}</p>
-                <p className="mt-1 text-xs text-slate-500">{new Date(m.created).toLocaleString()}</p>
+              <article key={`${m.created}-${idx}`} className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-800/50">
+                <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{m.from_user}</p>
+                <p className="text-sm text-slate-800 dark:text-slate-100">{m.text}</p>
+                <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{new Date(m.created).toLocaleString()}</p>
               </article>
             ))}
           </div>
           {!loading && messages.length === 0 ? (
-            <p className="mt-3 text-sm text-slate-600">No messages yet.</p>
+            <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">No messages yet.</p>
           ) : null}
         </section>
 
         <section className="card-surface p-4">
-          <h2 className="text-lg font-bold">Chats</h2>
-          <p className="mt-1 text-xs text-slate-500">Select a user to open a direct room.</p>
+          <h2 className="text-lg font-bold dark:text-white">Chats</h2>
+          <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">Select a user to open a direct room.</p>
 
           {loading ? (
             <div className="mt-3 space-y-2">
               {[0, 1, 2, 3].map((idx) => (
-                <div key={`chat-skeleton-${idx}`} className="rounded-xl border border-slate-200 bg-white p-3">
+                <div key={`chat-skeleton-${idx}`} className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-800/50">
                   <div className="flex items-center justify-between gap-3">
                     <div className="space-y-2">
                       <div className="skeleton h-3 w-24" />
@@ -294,15 +294,15 @@ export default function MessagesPage() {
                     setRoom(String(entry.room || "global"));
                     setRoomInput(String(entry.room || "global"));
                   }}
-                  className="w-full rounded-xl border border-teal-200 bg-teal-50/40 p-3 text-left transition hover:bg-teal-50"
+                  className="w-full rounded-xl border border-teal-200 bg-teal-50/40 p-3 text-left transition hover:bg-teal-50 dark:border-teal-700 dark:bg-teal-950/40 dark:hover:bg-teal-900/50"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-slate-900">{entry.partner}</p>
-                      <p className="truncate text-xs text-slate-600">{entry.last_from}: {entry.last_text}</p>
+                      <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{entry.partner}</p>
+                      <p className="truncate text-xs text-slate-600 dark:text-slate-400">{entry.last_from}: {entry.last_text}</p>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="text-[11px] text-slate-500">
+                      <p className="text-[11px] text-slate-600 dark:text-slate-400">
                         {entry.last_created ? new Date(entry.last_created).toLocaleTimeString() : ""}
                       </p>
                       {unreadCount > 0 ? (
@@ -310,7 +310,7 @@ export default function MessagesPage() {
                           {unreadCount > 99 ? "99+" : unreadCount}
                         </p>
                       ) : null}
-                      <p className={`text-[11px] font-semibold ${isOnline ? "text-emerald-600" : "text-slate-500"}`}>
+                      <p className={`text-[11px] font-semibold ${isOnline ? "text-emerald-600 dark:text-emerald-400" : "text-slate-600 dark:text-slate-400"}`}>
                         {isOnline ? "Online" : "Offline"}
                       </p>
                     </div>
@@ -320,7 +320,7 @@ export default function MessagesPage() {
             })}
           </div>
 
-          {recentRooms.length > 0 ? <p className="mt-3 text-xs font-semibold text-slate-500">All users</p> : null}
+          {recentRooms.length > 0 ? <p className="mt-3 text-xs font-semibold text-slate-600 dark:text-slate-400">All users</p> : null}
 
           <div className="mt-3 space-y-2">
             {users.map((chatUser) => {
@@ -332,19 +332,19 @@ export default function MessagesPage() {
                   key={email}
                   type="button"
                   onClick={() => openDmWith(chatUser.email)}
-                  className="w-full rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:-translate-y-0.5 hover:bg-slate-50"
+                  className="w-full rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:-translate-y-0.5 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:bg-slate-700"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">{chatUser.name || chatUser.email}</p>
-                      <p className="text-xs text-slate-500">{chatUser.email}</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{chatUser.name || chatUser.email}</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400">{chatUser.email}</p>
                     </div>
                     <div className="text-right">
-                      <p className={`text-xs font-semibold ${isOnline ? "text-emerald-600" : "text-slate-500"}`}>
+                      <p className={`text-xs font-semibold ${isOnline ? "text-emerald-600 dark:text-emerald-400" : "text-slate-600 dark:text-slate-400"}`}>
                         {isOnline ? "Online" : "Offline"}
                       </p>
                       {!isOnline && presence.last_seen ? (
-                        <p className="text-[11px] text-slate-400">
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400">
                           Last seen {new Date(presence.last_seen).toLocaleTimeString()}
                         </p>
                       ) : null}
@@ -355,27 +355,27 @@ export default function MessagesPage() {
             })}
           </div>
 
-          {users.length === 0 ? <p className="mt-3 text-sm text-slate-600">No users available.</p> : null}
+          {users.length === 0 ? <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">No users available.</p> : null}
         </section>
 
         <section className="card-surface p-4">
           <form onSubmit={openRoom} className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-bold">Room History</h2>
+            <h2 className="text-lg font-bold dark:text-white">Room History</h2>
             <input
               value={roomInput}
               onChange={(e) => setRoomInput(e.target.value)}
-              className="w-40 rounded-lg border border-slate-300 px-3 py-1.5 text-sm outline-none transition focus:border-teal-500"
+              className="w-40 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 outline-none transition focus:border-teal-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:placeholder:text-slate-500 dark:focus:border-teal-400"
             />
             <button
               type="submit"
-              className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-slate-800"
+              className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600"
             >
               Open
             </button>
           </form>
 
-          <p className="mt-2 text-xs text-slate-500">
-            Room: <span className="font-semibold text-slate-700">{room}</span>
+          <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">
+            Room: <span className="font-semibold text-slate-800 dark:text-slate-300">{room}</span>
             {" | "}
             Live: <span className={`status-chip status-chip-${wsState}`}>{wsState}</span>
           </p>
@@ -386,16 +386,16 @@ export default function MessagesPage() {
                 key={`${m.created || idx}-${idx}`}
                 className={`rounded-xl border p-3 ${
                   String(m.from_user || "").toLowerCase() === String(user?.email || "").toLowerCase()
-                    ? "ml-10 border-teal-200 bg-teal-50"
-                    : "mr-10 border-slate-200 bg-white"
+                    ? "ml-10 border-teal-200 bg-teal-50 dark:border-teal-700 dark:bg-teal-900/40"
+                    : "mr-10 border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800/50"
                 }`}
               >
-                <p className="text-xs font-bold text-slate-700">{m.from_user || "room"}</p>
-                <p className="text-sm text-slate-800">{m.text || ""}</p>
-                <div className="mt-1 flex items-center justify-between gap-2 text-xs text-slate-500">
+                <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{m.from_user || "room"}</p>
+                <p className="text-sm text-slate-800 dark:text-slate-100">{m.text || ""}</p>
+                <div className="mt-1 flex items-center justify-between gap-2 text-xs text-slate-600 dark:text-slate-400">
                   <span>{m.created ? new Date(m.created).toLocaleString() : "just now"}</span>
                   {String(m.from_user || "").toLowerCase() === String(user?.email || "").toLowerCase() ? (
-                    <span className="font-semibold text-slate-500">
+                    <span className="font-semibold text-slate-600 dark:text-slate-400">
                       {(m.seen_by || []).length > 0 ? "\u2714\u2714 Seen" : (m.delivered_to || []).length > 0 ? "\u2714\u2714 Delivered" : "\u2714 Sent"}
                     </span>
                   ) : null}
@@ -406,7 +406,7 @@ export default function MessagesPage() {
           </div>
 
           {roomMessages.length === 0 ? (
-            <p className="mt-3 text-sm text-slate-600">No room history yet.</p>
+            <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">No room history yet.</p>
           ) : null}
 
           <form onSubmit={sendRoomMessage} className="mt-3 flex gap-2">
@@ -414,12 +414,12 @@ export default function MessagesPage() {
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               placeholder="Type a live message"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-teal-500"
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-teal-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:placeholder:text-slate-500 dark:focus:border-teal-400"
             />
             <button
               type="submit"
               disabled={!draft.trim()}
-              className="rounded-lg bg-gradient-to-r from-teal-700 to-teal-500 px-4 py-2 text-sm font-bold text-white transition hover:brightness-105 disabled:opacity-60"
+              className="rounded-lg bg-gradient-to-r from-teal-700 to-teal-500 px-4 py-2 text-sm font-bold text-white transition hover:brightness-105 disabled:opacity-60 dark:from-teal-600 dark:to-teal-400 dark:hover:brightness-110"
             >
               Send
             </button>

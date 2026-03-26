@@ -76,9 +76,14 @@ export function AuthProvider({ children }) {
     toast.success("Welcome back");
   };
 
-  const signup = async (name, email, password) => {
+  const signup = async (name, email, password, referralCode = "") => {
     const normalizedEmail = email.trim().toLowerCase();
-    const { data } = await api.post("/auth/signup", { name, email: normalizedEmail, password });
+    const { data } = await api.post("/auth/signup", {
+      name,
+      email: normalizedEmail,
+      password,
+      referral_code: String(referralCode || "").trim().toUpperCase(),
+    });
     setToken(data.access_token);
     setRefreshToken(data.refresh_token);
     setUser(data.user);

@@ -16,8 +16,8 @@ export default function FeedPage() {
   const myName = useMemo(() => user?.name || "", [user]);
   const myEmail = useMemo(() => String(user?.email || "").toLowerCase(), [user]);
 
-  const loadPosts = async () => {
-    setLoading(true);
+  const loadPosts = async ({ showLoader = true } = {}) => {
+    if (showLoader) setLoading(true);
     setError("");
     try {
       const { data } = await api.get("/posts");
@@ -38,7 +38,7 @@ export default function FeedPage() {
     } catch (err) {
       setError(err?.response?.data?.detail || "Failed to load posts.");
     } finally {
-      setLoading(false);
+      if (showLoader) setLoading(false);
     }
   };
 
@@ -51,7 +51,7 @@ export default function FeedPage() {
     setError("");
     try {
       await api.post("/posts", { content, media: "" });
-      await loadPosts();
+      await loadPosts({ showLoader: false });
       toast.success("Post published");
     } catch (err) {
       setError(err?.response?.data?.detail || "Failed to create post.");
@@ -125,13 +125,13 @@ export default function FeedPage() {
   return (
     <section className="page-enter space-y-4 pb-20 md:pb-4">
       <div className="page-hero">
-        <h1 className="text-3xl font-bold tracking-tight">Feed</h1>
-        <p className="text-sm text-slate-600">Fresh updates from your network in one premium stream.</p>
+        <h1 className="text-3xl font-bold tracking-tight dark:text-white">Feed</h1>
+        <p className="text-sm text-slate-600 dark:text-slate-400">Fresh updates from your network in one premium stream.</p>
       </div>
 
       <Composer onSubmit={createPost} busy={posting} />
 
-      {error && <p className="rounded-xl bg-rose-100 px-3 py-2 text-sm text-rose-700">{error}</p>}
+      {error && <p className="rounded-xl bg-rose-100 px-3 py-2 text-sm text-rose-700 dark:bg-rose-950 dark:text-rose-300">{error}</p>}
 
       {loading ? (
         <div className="space-y-4">
@@ -143,6 +143,13 @@ export default function FeedPage() {
               <div className="skeleton h-52 w-full rounded-xl" />
             </div>
           ))}
+        </div>
+      ) : null}
+
+      {!loading && error && posts.length === 0 ? (
+        <div className="card-surface p-5 text-center">
+          <p className="text-sm text-slate-700 dark:text-slate-200">Could not load your feed right now.</p>
+          <button onClick={() => loadPosts()} className="brand-button mt-3">Retry</button>
         </div>
       ) : null}
 

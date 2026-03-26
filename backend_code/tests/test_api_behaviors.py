@@ -84,6 +84,14 @@ def test_strict_signup_validation_rejects_extra_fields(client: TestClient):
     assert res.status_code == 422
 
 
+def test_signup_rejects_invalid_email_format(client: TestClient):
+    res = client.post(
+        "/api/auth/signup",
+        json={"name": "Bad Mail", "email": "not-an-email", "password": "password123"},
+    )
+    assert res.status_code == 422
+
+
 def test_post_crud_and_saved_flow(client: TestClient):
     signup = _signup(client, "Pia", "pia@example.com", "password123")
     assert signup.status_code == 200
@@ -162,3 +170,42 @@ def test_admin_routes_and_auth_misc(client: TestClient):
 
     invalid_refresh = client.post("/api/auth/refresh", json={"refresh_token": "bad.token.value"})
     assert invalid_refresh.status_code == 401
+
+
+def test_referral_and_onboarding_growth_endpoints(client: TestClient):
+    inviter = _signup(client, "Ria", "ria@example.com", "password123")
+    assert inviter.status_code == 200
+    inviter_token = inviter.json()["access_token"]
+
+    invite_summary = client.get("/api/growth/invite/me", headers=_auth(inviter_token))
+    assert invite_summary.status_code == 200
+    invite_code = invite_summary.json()["invite_code"]
+    assert invite_code
+
+    invited = client.post(
+        "/api/auth/signup",
+        json={
+            "name": "Neo",
+            "email": "neo@example.com",
+            "password": "password123",
+            "referral_code": invite_code,
+        },
+    )
+    assert invited.status_code == 200
+    assert invited.json()["user"]["referred_by"] == "ria@example.com"
+
+    invite_summary_after = client.get("/api/growth/invite/me", headers=_auth(inviter_token))
+    assert invite_summary_after.status_code == 200
+    assert int(invite_summary_after.json()["invites_count"]) >= 1
+
+    invited_token = invited.json()["access_token"]
+    onboarding_status = client.get("/api/growth/onboarding/me", headers=_auth(invited_token))
+    assert onboarding_status.status_code == 200
+    assert onboarding_status.json()["onboarding_completed"] is False
+
+    complete = client.post("/api/growth/onboarding/complete", headers=_auth(invited_token))
+    assert complete.status_code == 200
+
+    onboarding_status_after = client.get("/api/growth/onboarding/me", headers=_auth(invited_token))
+    assert onboarding_status_after.status_code == 200
+    assert onboarding_status_after.json()["onboarding_completed"] is True

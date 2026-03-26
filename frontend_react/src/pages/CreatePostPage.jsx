@@ -71,25 +71,25 @@ export default function CreatePostPage() {
 
       <form onSubmit={handleSubmit} className="card-surface card-enter space-y-4 p-5">
         <label className="block">
-          <span className="mb-1 block text-sm font-semibold text-slate-700">Caption</span>
+          <span className="mb-1 block text-sm font-semibold text-slate-700 dark:text-slate-300">Caption</span>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="What are you building today?"
             rows={5}
-            className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none transition focus:border-teal-500"
+            className="w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900 outline-none transition focus:border-teal-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:placeholder:text-slate-500 dark:focus:border-teal-400"
           />
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-semibold text-slate-700">Upload Image (optional)</span>
+          <span className="mb-1 block text-sm font-semibold text-slate-700 dark:text-slate-300">Upload Image (optional)</span>
           <input
             type="file"
             accept="image/*"
             onChange={onFileChange}
-            className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none transition focus:border-teal-500"
+            className="w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900 outline-none transition focus:border-teal-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:file:text-slate-300 dark:focus:border-teal-400"
           />
-          <p className="mt-1 text-xs text-slate-500">Supported: jpg, png, webp, gif up to 5MB.</p>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Supported: jpg, png, webp, gif up to 5MB.</p>
         </label>
 
         {previewUrl ? (

@@ -6,7 +6,9 @@ import { useAuth } from "./state/AuthContext";
 
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const SignupPage = lazy(() => import("./pages/SignupPage"));
+const InvitePage = lazy(() => import("./pages/InvitePage"));
 const FeedPage = lazy(() => import("./pages/FeedPage"));
+const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
 const CreatePostPage = lazy(() => import("./pages/CreatePostPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const ExplorePage = lazy(() => import("./pages/ExplorePage"));
@@ -54,6 +56,19 @@ export default function App() {
             }
           />
           <Route
+            path="/invite"
+            element={
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.22 }}
+              >
+                <InvitePage />
+              </motion.div>
+            }
+          />
+          <Route
             path="/*"
             element={
               <Protected>
@@ -66,6 +81,7 @@ export default function App() {
                   <AppShell>
                     <Routes>
                       <Route path="/" element={<Navigate to="/feed" replace />} />
+                      <Route path="/onboarding" element={<OnboardingPage />} />
                       <Route path="/feed" element={<FeedPage />} />
                       <Route path="/create" element={<CreatePostPage />} />
                       <Route path="/profile" element={<ProfilePage />} />

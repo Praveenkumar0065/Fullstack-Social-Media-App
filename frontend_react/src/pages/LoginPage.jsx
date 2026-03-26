@@ -32,42 +32,50 @@ export default function LoginPage() {
       <div className="auth-orb auth-orb-teal" />
       <div className="auth-orb auth-orb-amber" />
 
-      <form onSubmit={handleSubmit} className="auth-card card-enter">
-        <h1 className="text-3xl font-bold tracking-tight">Welcome Back</h1>
-        <p className="mt-1 text-sm text-slate-600">Sign in to continue your Pulsegram flow.</p>
-        {error && <p className="mt-3 rounded-lg bg-rose-100 px-3 py-2 text-sm text-rose-700">{error}</p>}
+      <div className="auth-split-card card-enter">
+        <form onSubmit={handleSubmit} className="auth-pane auth-pane-form">
+          <h1 className="auth-pane-title">Sign in</h1>
+          <p className="auth-pane-subtitle">or use your account</p>
+          {error && <p className="auth-inline-error">{error}</p>}
 
-        <div className="mt-4 space-y-3">
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            className="field-input"
-          />
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="field-input"
-          />
-        </div>
+          <div className="mt-5 space-y-3">
+            <label className="auth-input-row" aria-label="E-mail">
+              <span className="auth-input-icon" aria-hidden="true">@</span>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="E-mail"
+                className="auth-neo-input"
+              />
+            </label>
+            <label className="auth-input-row" aria-label="Password">
+              <span className="auth-input-icon" aria-hidden="true">*</span>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="auth-neo-input"
+              />
+            </label>
+          </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="brand-button mt-4 w-full disabled:opacity-60"
-        >
-          {loading ? "Signing in..." : "Sign In"}
-        </button>
+          <p className="mt-3 text-center text-xs text-slate-400">Forgot your password?</p>
 
-        <p className="mt-4 text-center text-sm text-slate-600">
-          New here? <Link to="/signup" className="font-bold text-emerald-700">Create account</Link>
-        </p>
-      </form>
+          <button type="submit" disabled={loading} className="auth-primary-action mt-3 w-full disabled:opacity-60">
+            {loading ? "SIGNING IN..." : "SIGN IN"}
+          </button>
+        </form>
+
+        <aside className="auth-pane auth-pane-cta">
+          <h2 className="auth-pane-cta-title">New here ?</h2>
+          <p className="auth-pane-cta-subtitle">Enter your personal details and start your journey with us.</p>
+          <Link to="/signup" className="auth-secondary-action">SIGN UP</Link>
+        </aside>
+      </div>
     </div>
   );
 }
