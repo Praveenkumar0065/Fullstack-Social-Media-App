@@ -13,6 +13,8 @@ This changelog is automatically prepended during release workflow runs.
 - Hardened backend auth request validation by requiring proper email format for signup/login payloads.
 - Refactored repeated authenticated user email extraction into a shared helper for cleaner protected-route checks.
 - Added focused backend regression coverage for signup validation and growth/onboarding flows.
+- Fixed backend DB initialization regression causing auth login 500s during smoke verification.
+- Aligned app version metadata to 1.0.2 across backend defaults, environment template, and Render blueprint.
 - Added custom workspace agents for fullstack maintenance, release gatekeeping, security review, and frontend UX polish.
 
 ## v1.0.1 - 2026-03-23
