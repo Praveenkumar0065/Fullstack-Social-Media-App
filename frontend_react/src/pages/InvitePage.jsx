@@ -10,8 +10,8 @@ export default function InvitePage() {
       <div className="auth-orb auth-orb-amber" />
 
       <div className="auth-card card-enter space-y-4">
-        <h1 className="text-3xl font-bold tracking-tight">You are Invited</h1>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
+        <h1 className="text-3xl font-bold tracking-tight dark:text-white">You are Invited</h1>
+        <p className="page-subtle-text">
           Join Pulsegram and start building your network.
         </p>
 

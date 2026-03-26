@@ -58,7 +58,7 @@ export default function ProfilePage() {
     <section className="page-enter space-y-4 pb-20 md:pb-4">
       <div className="page-hero">
         <h1 className="text-3xl font-bold tracking-tight dark:text-white">{user?.name || "Profile"}</h1>
-        <p className="text-sm text-slate-600 dark:text-slate-400">{user?.email}</p>
+        <p className="page-subtle-text">{user?.email}</p>
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div className="card-surface-soft p-3">
             <p className="text-xs text-slate-600 dark:text-slate-400">Followers</p>
@@ -113,7 +113,7 @@ export default function ProfilePage() {
             <button
               type="button"
               onClick={copyInviteLink}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              className="ui-button-secondary text-xs"
             >
               Copy Link
             </button>
@@ -140,7 +140,9 @@ export default function ProfilePage() {
           ))}
         </div>
         {!loading && myPosts.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">No posts yet.</p>
+          <div className="empty-state-card mt-3">
+            <p className="page-subtle-text">No posts yet.</p>
+          </div>
         ) : null}
       </div>
 
@@ -156,7 +158,9 @@ export default function ProfilePage() {
             ))}
           </div>
           {!loading && followers.length === 0 ? (
-            <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">No followers yet.</p>
+            <div className="empty-state-card mt-3">
+              <p className="page-subtle-text">No followers yet.</p>
+            </div>
           ) : null}
         </section>
 
@@ -171,7 +175,9 @@ export default function ProfilePage() {
             ))}
           </div>
           {!loading && following.length === 0 ? (
-            <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">Not following anyone yet.</p>
+            <div className="empty-state-card mt-3">
+              <p className="page-subtle-text">Not following anyone yet.</p>
+            </div>
           ) : null}
         </section>
       </div>

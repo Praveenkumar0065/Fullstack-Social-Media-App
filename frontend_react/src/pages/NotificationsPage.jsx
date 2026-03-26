@@ -64,8 +64,8 @@ export default function NotificationsPage() {
     <section className="page-enter space-y-4 pb-20 md:pb-4">
       <div className="page-hero flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
-          <p className="text-sm text-slate-600">Realtime alerts from your social graph.</p>
+          <h1 className="text-3xl font-bold tracking-tight dark:text-white">Notifications</h1>
+          <p className="page-subtle-text">Realtime alerts from your social graph.</p>
           <p className="mt-1 text-xs font-semibold text-emerald-700">
             {unreadCount > 0 ? `${unreadCount} unread` : "All caught up"}
           </p>
@@ -73,13 +73,13 @@ export default function NotificationsPage() {
         <button
           onClick={markAllRead}
           disabled={busyReadAll || unreadCount === 0}
-          className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-60"
+          className="ui-button-secondary disabled:opacity-60"
         >
           {busyReadAll ? "Marking..." : "Mark all read"}
         </button>
       </div>
 
-      {error && <p className="rounded-xl bg-rose-100 px-3 py-2 text-sm text-rose-700">{error}</p>}
+      {error && <p className="rounded-xl bg-rose-100 px-3 py-2 text-sm text-rose-700 dark:bg-rose-950 dark:text-rose-300">{error}</p>}
       {loading ? (
         <div className="space-y-3">
           {[0, 1, 2, 3].map((idx) => (
@@ -102,23 +102,25 @@ export default function NotificationsPage() {
             key={`${n.id || n.created}-${idx}`}
             onClick={() => markOneRead(n)}
             className={`card-surface card-enter cursor-pointer border p-4 transition duration-200 hover:-translate-y-0.5 hover:shadow-xl ${
-              n.is_read ? "border-slate-200" : "border-teal-300 bg-teal-50/50"
+              n.is_read ? "border-slate-200" : "border-teal-300 bg-teal-50/50 dark:bg-teal-950/40"
             }`}
             style={{ animationDelay: `${idx * 45}ms` }}
           >
             <div className="flex items-start justify-between gap-2">
-              <p className="text-sm text-slate-800">{n.title}</p>
+              <p className="text-sm text-slate-800 dark:text-slate-100">{n.title}</p>
               {!n.is_read ? (
                 <span className="mt-0.5 inline-flex h-2.5 w-2.5 rounded-full bg-emerald-600" />
               ) : null}
             </div>
-            <p className="mt-1 text-xs text-slate-500">{new Date(n.created).toLocaleString()}</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{new Date(n.created).toLocaleString()}</p>
           </article>
         ))}
       </div>
 
       {!loading && items.length === 0 ? (
-        <p className="text-sm text-slate-600">No notifications yet.</p>
+        <div className="empty-state-card">
+          <p className="page-subtle-text">No notifications yet.</p>
+        </div>
       ) : null}
     </section>
   );

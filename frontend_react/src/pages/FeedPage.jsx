@@ -126,7 +126,7 @@ export default function FeedPage() {
     <section className="page-enter space-y-4 pb-20 md:pb-4">
       <div className="page-hero">
         <h1 className="text-3xl font-bold tracking-tight dark:text-white">Feed</h1>
-        <p className="text-sm text-slate-600 dark:text-slate-400">Fresh updates from your network in one premium stream.</p>
+        <p className="page-subtle-text">Fresh updates from your network in one premium stream.</p>
       </div>
 
       <Composer onSubmit={createPost} busy={posting} />
@@ -147,7 +147,7 @@ export default function FeedPage() {
       ) : null}
 
       {!loading && error && posts.length === 0 ? (
-        <div className="card-surface p-5 text-center">
+        <div className="empty-state-card">
           <p className="text-sm text-slate-700 dark:text-slate-200">Could not load your feed right now.</p>
           <button onClick={() => loadPosts()} className="brand-button mt-3">Retry</button>
         </div>
@@ -172,7 +172,9 @@ export default function FeedPage() {
       </div>
 
       {!loading && posts.length === 0 ? (
-        <p className="text-sm text-slate-600">No posts yet. Be the first to share.</p>
+        <div className="empty-state-card">
+          <p className="page-subtle-text">No posts yet. Be the first to share.</p>
+        </div>
       ) : null}
     </section>
   );

@@ -65,8 +65,8 @@ export default function CreatePostPage() {
   return (
     <section className="page-enter space-y-4 pb-20 md:pb-4">
       <div className="page-hero">
-        <h1 className="text-3xl font-bold tracking-tight">Create Post</h1>
-        <p className="text-sm text-slate-600">Share your thoughts and upload an image with your followers.</p>
+        <h1 className="text-3xl font-bold tracking-tight dark:text-white">Create Post</h1>
+        <p className="page-subtle-text">Share your thoughts and upload an image with your followers.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="card-surface card-enter space-y-4 p-5">
@@ -77,7 +77,7 @@ export default function CreatePostPage() {
             onChange={(e) => setContent(e.target.value)}
             placeholder="What are you building today?"
             rows={5}
-            className="w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900 outline-none transition focus:border-teal-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:placeholder:text-slate-500 dark:focus:border-teal-400"
+            className="ui-input min-h-28 p-3"
           />
         </label>
 
@@ -87,7 +87,7 @@ export default function CreatePostPage() {
             type="file"
             accept="image/*"
             onChange={onFileChange}
-            className="w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900 outline-none transition focus:border-teal-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:file:text-slate-300 dark:focus:border-teal-400"
+            className="ui-input p-3"
           />
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Supported: jpg, png, webp, gif up to 5MB.</p>
         </label>
@@ -102,7 +102,7 @@ export default function CreatePostPage() {
           </div>
         ) : null}
 
-        {error ? <p className="rounded-xl bg-rose-100 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
+        {error ? <p className="rounded-xl bg-rose-100 px-3 py-2 text-sm text-rose-700 dark:bg-rose-950 dark:text-rose-300">{error}</p> : null}
 
         <button
           type="submit"

@@ -91,6 +91,80 @@ h1, h2, h3 {
   box-shadow: 0 8px 16px rgba(13, 148, 136, 0.25);
 }
 
+.ui-button-secondary {
+  @apply rounded-xl border px-3 py-2 text-sm font-semibold transition;
+  border-color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.9);
+  color: #334155;
+}
+
+.ui-button-secondary:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.dark .ui-button-secondary {
+  border-color: #475569;
+  background: rgba(30, 41, 59, 0.82);
+  color: #cbd5e1;
+}
+
+.dark .ui-button-secondary:hover {
+  background: rgba(51, 65, 85, 0.92);
+  border-color: #64748b;
+}
+
+.ui-input {
+  @apply w-full rounded-xl border px-3 py-2 text-sm outline-none transition;
+  border-color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+}
+
+.ui-input::placeholder {
+  color: #64748b;
+}
+
+.ui-input:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+.dark .ui-input {
+  border-color: #475569;
+  background: rgba(30, 41, 59, 0.82);
+  color: #cbd5e1;
+}
+
+.dark .ui-input::placeholder {
+  color: #94a3b8;
+}
+
+.dark .ui-input:focus {
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.25);
+}
+
+.empty-state-card {
+  @apply rounded-2xl border p-5 text-center;
+  border-color: #dbe5f0;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.dark .empty-state-card {
+  border-color: #334155;
+  background: rgba(30, 41, 59, 0.7);
+}
+
+.page-subtle-text {
+  @apply text-sm;
+  color: #64748b;
+}
+
+.dark .page-subtle-text {
+  color: #94a3b8;
+}
+
 .page-hero {
   @apply rounded-2xl border px-5 py-4;
   border-color: #d8e5ee;

@@ -227,7 +227,7 @@ export default function MessagesPage() {
     <section className="page-enter space-y-4 pb-20 md:pb-4">
       <div className="page-hero">
         <h1 className="text-3xl font-bold tracking-tight dark:text-white">Messages</h1>
-        <p className="text-sm text-slate-600 dark:text-slate-400">Direct messaging with live status, seen ticks, and unread badges.</p>
+        <p className="page-subtle-text">Direct messaging with live status, seen ticks, and unread badges.</p>
       </div>
 
       {error && <p className="rounded-xl bg-rose-100 px-3 py-2 text-sm text-rose-700 dark:bg-rose-950 dark:text-rose-300">{error}</p>}
@@ -364,7 +364,7 @@ export default function MessagesPage() {
             <input
               value={roomInput}
               onChange={(e) => setRoomInput(e.target.value)}
-              className="w-40 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 outline-none transition focus:border-teal-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:placeholder:text-slate-500 dark:focus:border-teal-400"
+              className="ui-input w-40"
             />
             <button
               type="submit"
@@ -414,7 +414,7 @@ export default function MessagesPage() {
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               placeholder="Type a live message"
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-teal-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:placeholder:text-slate-500 dark:focus:border-teal-400"
+              className="ui-input"
             />
             <button
               type="submit"

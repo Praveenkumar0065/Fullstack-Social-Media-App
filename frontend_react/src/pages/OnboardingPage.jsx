@@ -39,7 +39,7 @@ export default function OnboardingPage() {
     <section className="page-enter mx-auto max-w-2xl space-y-4 pb-20 pt-8 md:pb-4">
       <div className="page-hero">
         <h1 className="text-3xl font-bold tracking-tight dark:text-white">Quick Start</h1>
-        <p className="text-sm text-slate-600 dark:text-slate-400">Complete these steps to unlock your personalized experience.</p>
+        <p className="page-subtle-text">Complete these steps to unlock your personalized experience.</p>
       </div>
 
       <div className="card-surface p-6">
@@ -48,6 +48,9 @@ export default function OnboardingPage() {
         </p>
         <h2 className="mt-2 text-2xl font-bold dark:text-white">{current.title}</h2>
         <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">{current.description}</p>
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+          <div className="h-full rounded-full bg-gradient-to-r from-teal-600 to-emerald-500 transition-all" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
+        </div>
 
         <div className="mt-6 flex gap-2">
           {step < STEPS.length - 1 ? (
@@ -73,7 +76,7 @@ export default function OnboardingPage() {
             type="button"
             onClick={finishOnboarding}
             disabled={busy}
-            className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+            className="ui-button-secondary"
           >
             Skip
           </button>

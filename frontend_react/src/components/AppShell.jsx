@@ -108,7 +108,7 @@ export default function AppShell({ children }) {
 
   return (
     <div className="app-frame">
-      <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/75 backdrop-blur-md dark:border-slate-700 dark:bg-slate-900/75">
+      <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/75 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/75">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
           <Link to="/feed" className="group inline-flex items-center gap-2">
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-700 to-teal-500 text-xs font-bold text-white">
@@ -135,13 +135,13 @@ export default function AppShell({ children }) {
               </NavLink>
             ))}
           </nav>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <span className="hidden rounded-lg bg-slate-100/90 px-2.5 py-1 text-xs font-semibold text-slate-700 sm:block dark:bg-slate-800 dark:text-slate-300">
               {user?.email || "Signed in"}
             </span>
             <button
               onClick={toggleTheme}
-              className="interactive rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:bg-slate-700"
+              className="ui-button-secondary interactive text-sm"
             >
               {theme === "dark" ? "Light" : "Dark"}
             </button>
@@ -155,7 +155,7 @@ export default function AppShell({ children }) {
             ) : null}
             <button
               onClick={handleLogout}
-              className="interactive rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:bg-slate-700"
+              className="ui-button-secondary interactive text-sm"
             >
               Logout
             </button>
