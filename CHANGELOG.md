@@ -5,7 +5,12 @@ All notable changes to this project are documented in this file.
 This changelog is automatically prepended during release workflow runs.
 
 ## Unreleased
-- No unreleased changes.
+- Polished login/signup UI with closer split-panel styling, refined spacing, and improved mobile/desktop presentation.
+- Added invite and onboarding frontend routes/pages and integrated referral-aware signup UX.
+- Hardened backend auth request validation by requiring proper email format for signup/login payloads.
+- Refactored repeated authenticated user email extraction into a shared helper for cleaner protected-route checks.
+- Added focused backend regression coverage for signup validation and growth/onboarding flows.
+- Added custom workspace agents for fullstack maintenance, release gatekeeping, security review, and frontend UX polish.
 
 ## v1.0.1 - 2026-03-23
 - Added PBKDF2-SHA256 password hashing with compatibility/migration for legacy credentials.
