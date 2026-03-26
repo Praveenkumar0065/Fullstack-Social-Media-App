@@ -33,9 +33,10 @@ export default function LoginPage() {
       <div className="auth-orb auth-orb-amber" />
 
       <div className="auth-split-card card-enter">
-        <form onSubmit={handleSubmit} className="auth-pane auth-pane-form">
+        <form onSubmit={handleSubmit} className="auth-pane auth-pane-form auth-pane-form-centered">
           <h1 className="auth-pane-title">Sign in</h1>
           <p className="auth-pane-subtitle">or use your account</p>
+          <div className="auth-divider" aria-hidden="true" />
           {error && <p className="auth-inline-error">{error}</p>}
 
           <div className="mt-5 space-y-3">
@@ -65,7 +66,7 @@ export default function LoginPage() {
 
           <p className="mt-3 text-center text-xs text-slate-400">Forgot your password?</p>
 
-          <button type="submit" disabled={loading} className="auth-primary-action mt-3 w-full disabled:opacity-60">
+          <button type="submit" disabled={loading} className="auth-primary-action auth-primary-action-compact mt-3 disabled:opacity-60">
             {loading ? "SIGNING IN..." : "SIGN IN"}
           </button>
         </form>

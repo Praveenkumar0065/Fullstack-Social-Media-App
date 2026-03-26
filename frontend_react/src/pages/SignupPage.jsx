@@ -43,9 +43,10 @@ export default function SignupPage() {
           <Link to="/login" className="auth-secondary-action">SIGN IN</Link>
         </aside>
 
-        <form onSubmit={handleSubmit} className="auth-pane auth-pane-form">
+        <form onSubmit={handleSubmit} className="auth-pane auth-pane-form auth-pane-form-centered">
           <h1 className="auth-pane-title">Create account</h1>
           <p className="auth-pane-subtitle">or create your profile</p>
+          <div className="auth-divider" aria-hidden="true" />
           {referralCode ? <p className="auth-inline-note">Invite applied: {referralCode}</p> : null}
           {error && <p className="auth-inline-error">{error}</p>}
 
@@ -84,7 +85,7 @@ export default function SignupPage() {
             </label>
           </div>
 
-          <button type="submit" disabled={loading} className="auth-primary-action mt-5 w-full disabled:opacity-60">
+          <button type="submit" disabled={loading} className="auth-primary-action auth-primary-action-compact mt-5 disabled:opacity-60">
             {loading ? "CREATING..." : "SIGN UP"}
           </button>
         </form>

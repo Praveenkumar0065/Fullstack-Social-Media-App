@@ -184,6 +184,10 @@ button:active:not(:disabled) {
   background: linear-gradient(145deg, #0b0c16 0%, #111423 100%);
 }
 
+.auth-pane-form-centered {
+  @apply flex flex-col items-center;
+}
+
 .auth-pane-title {
   @apply text-4xl font-bold;
   font-family: "Space Grotesk", sans-serif;
@@ -195,8 +199,14 @@ button:active:not(:disabled) {
   color: #94a3b8;
 }
 
+.auth-divider {
+  margin-top: 0.35rem;
+  width: 5.25rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.35);
+}
+
 .auth-input-row {
-  @apply flex items-center gap-2 rounded-lg px-2.5 py-1.5;
+  @apply flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5;
   border: 1px solid #1f2937;
   background: #151a29;
 }
@@ -231,6 +241,10 @@ button:active:not(:disabled) {
   background: linear-gradient(120deg, #f0abfc, #d946ef 65%, #a21caf);
 }
 
+.auth-primary-action-compact {
+  width: min(12rem, 80%);
+}
+
 .auth-primary-action:hover {
   filter: brightness(1.06);
   box-shadow: 0 8px 20px rgba(217, 70, 239, 0.35);
@@ -262,7 +276,7 @@ button:active:not(:disabled) {
 }
 
 .auth-pane-cta-subtitle {
-  @apply mt-3 max-w-xs text-sm;
+  @apply mt-3 max-w-[18rem] text-sm;
   color: rgba(9, 9, 11, 0.78);
 }
 
@@ -286,6 +300,10 @@ button:active:not(:disabled) {
   .auth-pane-cta {
     order: -1;
     min-height: 220px;
+  }
+
+  .auth-primary-action-compact {
+    width: 100%;
   }
 }
 
