@@ -46,11 +46,17 @@ logging.basicConfig(
 logger = logging.getLogger("socialsphere.main")
 
 APP_NAME = os.getenv("APP_NAME", "Social Web App API")
-APP_VERSION = os.getenv("APP_VERSION", "1.0.0")
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_VERSION = "1.0.0"
+version_file = PROJECT_ROOT / "VERSION"
+if version_file.exists():
+    loaded_version = version_file.read_text(encoding="utf-8").strip()
+    if loaded_version:
+        DEFAULT_VERSION = loaded_version
+APP_VERSION = os.getenv("APP_VERSION", DEFAULT_VERSION)
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*")
 SENTRY_DSN = os.getenv("SENTRY_DSN", "").strip()
 SENTRY_TRACES_SAMPLE_RATE = float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.0"))
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
 USE_LEGACY_FRONTEND_FALLBACK = os.getenv("USE_LEGACY_FRONTEND_FALLBACK", "false").strip().lower() in {"1", "true", "yes"}
 FRONTEND_DIR_CANDIDATES = [PROJECT_ROOT / "frontend_react" / "dist"]
 if USE_LEGACY_FRONTEND_FALLBACK:

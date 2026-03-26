@@ -202,6 +202,7 @@ def get_db():
     mongodb_uri = os.getenv("MONGODB_URI", "").strip()
     if not mongodb_uri:
         return None
+    db_name = os.getenv("MONGODB_DB", "socialsphere").strip() or "socialsphere"
 
     try:
         _client = MongoClient(mongodb_uri, serverSelectionTimeoutMS=3000)

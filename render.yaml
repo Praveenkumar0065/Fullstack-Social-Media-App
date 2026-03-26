@@ -9,7 +9,7 @@ services:
       - key: APP_NAME
         value: Social Web App API
       - key: APP_VERSION
-        value: 1.0.1
+        value: 1.0.2
       - key: ALLOWED_ORIGINS
         sync: false
       - key: MONGODB_URI
